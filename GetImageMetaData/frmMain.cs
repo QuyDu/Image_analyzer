@@ -1,4 +1,5 @@
 ﻿using GetImageMetaData.Properties;
+using Microsoft.ProjectOxford.Face;
 using Microsoft.ProjectOxford.Face.Contract;
 using Microsoft.ProjectOxford.Vision;
 using Microsoft.ProjectOxford.Vision.Contract;
@@ -28,11 +29,11 @@ using Size = System.Drawing.Size;
 
 namespace GetImageMetaData
 {
-    // Update 02/08/2019 10:00 AM
+    // Update 03/23/2019 11:30 AM
     public partial class FrmMain : Form
     {
         #region Inital Values
-        private enum eMediaType
+        private enum EMediaType
         {
             Image,
             Video,
@@ -46,9 +47,6 @@ namespace GetImageMetaData
         {
             new ImageEncodingParam(ImwriteFlags.JpegQuality, 60)
         };
-        // Declare Variables
-
-        // TASK TODO for anthony: move all option variables into an Options class and then set the member vars of Options = Settings properties
 
         private Options _options = new Options();
         // then you really shouuld add a load/save method to the Options class and call at the beginning of frmMain _options.Load();
@@ -58,8 +56,7 @@ namespace GetImageMetaData
         private int _rotateDegrees = 0;
         private string _ext;
         private bool _cameraModeAuto; // true if camera analysis is happening automatically
-        //private string _personGroupDisplayName;
-        
+        //private string _personGroupDisplayName;  
 
         public ObservableCollection<LiveCameraResult> _totalApiResults = new ObservableCollection<LiveCameraResult>();
         public LiveCameraResult _apiResult { get; set; }
@@ -74,13 +71,11 @@ namespace GetImageMetaData
         // our active group/person vars
         private List<string> _personsInActiveGroup = new List<string>();
 
-
         //private readonly Log _analysisLog = new Log();
         private readonly ImageEncodingParam[] _sJpegParams =
         {
             new ImageEncodingParam(ImwriteFlags.JpegQuality, 60)
         };
-
 
         // constants
         private const string API_METHOD = "analyze";
@@ -106,74 +101,100 @@ namespace GetImageMetaData
         /// </returns>
 
         private async void Form1_ShownAsync(object sender, EventArgs e)
-        {         
-            if (GenLib.CheckForInternetConnection())
+        {
+            await _options.UpdateMemberVarsFromProperties();
+            bool Internet = _options.Internet;
+            bool containerMode = _options.ContainerMode;
+            bool PersonGroupExist = _options.personGroupFound;
+            string CSKey = _options.CSKey;
+            string CSEndpoint = _options.CSEndpoint;
+            string PersonGroupId = _options.PersonGroupId;
+            string msgType1 = "First";
+            string msgType2 = "PersonGroups";
+            string msgType3 = "PersonGroups";
+            string msgType4 = "Internet";
+
+            FaceServiceClient faceClient = _options._faceServiceClient;
+
+            BuildSourceList();
+            if (cmbSource.Items.Count > 0)
+                cmbSource.SelectedIndex = 0;
+
+            if (string.IsNullOrWhiteSpace(CSKey) || string.IsNullOrWhiteSpace(CSEndpoint))
             {
+                MessageBox.Show(GenLib.SetMessage(msgType1, string.Empty, string.Empty, null));
+                new FrmOptions().ShowDialog();
+
+                // after options is closed update with new values
                 await _options.UpdateMemberVarsFromProperties();
+                Internet = _options.Internet;
+                containerMode = _options.ContainerMode;
+                PersonGroupExist = _options.personGroupFound;
+                CSKey = _options.CSKey;
+                CSEndpoint = _options.CSEndpoint;
+                PersonGroupId = _options.PersonGroupId;
+                faceClient = _options._faceServiceClient;
 
-                BuildSourceList();
-                if (cmbSource.Items.Count > 0)
-                    cmbSource.SelectedIndex = 0;
-
-                if (string.IsNullOrWhiteSpace(_options.CSKey) || string.IsNullOrWhiteSpace(_options.CSEndpoint))
+                if (!string.IsNullOrWhiteSpace(CSKey) && !string.IsNullOrWhiteSpace(CSEndpoint))
                 {
-                    MessageBox.Show(
-                        @"Since this appears to be the first time this program has been run, please continue by defining the required options in the following dialog.");
-                    new FrmOptions().ShowDialog();
-                    await UpdatePersonListAsync(_options.groupID);
-                }
-                else
-                {
-                    //await GenLib.CreatePersonGroupIfNeededAsync();
-                    await GenLib.UpdatePersonGroupList();
-
-                    if (!string.IsNullOrWhiteSpace(_options.PersonGroupId))
+                    await GenLib.UpdatePersonGroupList(CSKey, CSEndpoint, faceClient);
+                    if (!string.IsNullOrWhiteSpace(PersonGroupId))
                     {
-                        await UpdatePersonListAsync(_options.PersonGroupId);
+                        await UpdatePersonListAsync(PersonGroupId, PersonGroupExist);
                     }
                     else
                     {
-                        MessageBox.Show($@"You are recieving this message because of 1 of the following reasons:
-
-                        1. You have Entereded an invalid Cognitive Services API Key.
-                            (This App uses the Cognitive Services 1 Key)
-
-                        2. You have entered an invalid Cognitive Services Endpoint. 
-                            (Cognitive Services 1 Key Endpoint should look something like depending on region selected,
-                            https://westus.api.cognitive.microsoft.com/
-
-                        3. There are currently no personGroups registed for this API Key.
-                            To create a new personGroup:
-                            a. Analyze Image with a face
-                            b. Click on face
-                            c. Click on Add Face
-                            d. Add a name of the desired persongroup
-                                (personGroup name must be lowercase and no spaces)
-                            e. Add a name for the person being added
-                                (when creating a new personGroup you must add a new person for personGroup to be trained)
-                            f. Click on Save.");
-
-                        new FrmOptions().ShowDialog();
-                        await UpdatePersonListAsync(_options.groupID);
+                        MessageBox.Show(GenLib.SetMessage(msgType2, string.Empty, string.Empty, null));
                     }
                 }
             }
             else
             {
-                MessageBox.Show(
-                    @"It appears there is no Interent Connection, Please verify your Internet Connection and all Application Settings.");
-                new FrmOptions().ShowDialog();
-                await UpdatePersonListAsync(_options.groupID);
+                if (!containerMode)
+                {
+                    if (Internet)
+                    {
+                        await GenLib.UpdatePersonGroupList(CSKey, CSEndpoint, faceClient);
+
+                        if (!string.IsNullOrWhiteSpace(PersonGroupId))
+                        {
+                            await UpdatePersonListAsync(PersonGroupId, PersonGroupExist);
+                        }
+                        else
+                        {
+                            MessageBox.Show(GenLib.SetMessage(msgType3, string.Empty, string.Empty, null));
+                            new FrmOptions().ShowDialog();
+                        }
+                    }
+                    else // no internet
+                    {
+                        MessageBox.Show(GenLib.SetMessage(msgType4, string.Empty, string.Empty, null));
+                    }
+                }
+                else // ContainerMode is set to true
+                {
+
+                }
             }
         }
 
         private async void OptionsToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            string msgType1 = "First";
             new FrmOptions().ShowDialog();
-            
+            //Below code updates after exiting options menu
             await _options.UpdateMemberVarsFromProperties();
-            await GenLib.UpdatePersonGroupList();
-            await UpdatePersonListAsync(_options.groupID);
+            // TASK update to include if values are removed from options
+            if (string.IsNullOrWhiteSpace(_options.CSKey) || string.IsNullOrWhiteSpace(_options.CSEndpoint))
+            {
+                MessageBox.Show(GenLib.SetMessage(msgType1, string.Empty, string.Empty, null));
+            }
+            else
+            {
+                await GenLib.UpdatePersonGroupList(_options.CSKey, _options.FaceEndpoint, _options._faceServiceClient);
+                await UpdatePersonListAsync(_options.groupID, _options.personGroupFound);
+            }
+
         }
 
         public async Task TrainPersonGroup(string groupID)
@@ -188,23 +209,21 @@ namespace GetImageMetaData
         {
             await _options._faceServiceClient.GetPersonGroupTrainingStatusAsync(groupID);
         }
+
         public async Task<Tuple<string, AnalysisResult>> MakeAnalysisRequest(Image workImage)
         {
             AnalysisResult analysisResult = null;
-            //
-            // Create Project Oxford Computer Vision API Service client
-            //
+
             string errStr = string.Empty;
-            //VisionServiceClient visionServiceClient = new VisionServiceClient(_visionKey);
+            //
+            // Analyze the image for all visual features
+            //
             Stream imageFileStream = GenLib.ConvertAndCompressImageFileToStream(workImage, MAX_IMAGE_SIZE, out errStr);
             if (imageFileStream != null)
             {
                 // we were able to convert image file to stream ok - continue
                 try
                 {
-                    //
-                    // Analyze the image for all visual features
-                    //
                     VisualFeature[] visualFeatures = {
                         VisualFeature.Adult, VisualFeature.Categories, VisualFeature.Color, VisualFeature.Description,
                         VisualFeature.Faces, VisualFeature.ImageType, VisualFeature.Tags,
@@ -224,13 +243,12 @@ namespace GetImageMetaData
 
         public async Task UpdatePersonListAsync()
         {
-            await UpdatePersonListAsync(string.Empty);
+            await _options.UpdateMemberVarsFromProperties();
+            await UpdatePersonListAsync(string.Empty, _options.personGroupFound);
         }
 
-        public async Task UpdatePersonListAsync(string groupID)
+        public async Task UpdatePersonListAsync(string groupID, bool personGroupExist)
         {
-            await _options.UpdateMemberVarsFromProperties();
-            bool personGroupExist = _options.personGroupFound;
             if (personGroupExist)
             {
                 try
@@ -249,20 +267,7 @@ namespace GetImageMetaData
 
                     if (_personsInActiveGroup.Count == 0)
                     {
-                        MessageBox.Show($@"There are Currently no Face Profiles registered for the person group {personGroupId}, you can create Person Profiles by:
-
-                        1. Browse for an image,
-                        This is done by clicking on Choose File.
-
-                        2. Analyze the image, 
-                        This is done by clicking on Analyze.
-
-                        3. Right click on the face with a Box around it,
-                         that you wish to create the profile for.
-
-                        4. Click on Add Face. 
-
-                        5. Type in the name of the person and click on Save Name");
+                        MessageBox.Show(GenLib.SetMessage("UpdatePersonList", personGroupId, string.Empty, null));           
                     }
                 }
                 catch (Exception ex)
@@ -504,17 +509,25 @@ namespace GetImageMetaData
         }
         public byte[] GetImageAsByteArray(string imageFilePath)
         {
-            var fileStream = new FileStream(imageFilePath, FileMode.Open, FileAccess.Read);
-            var binaryReader = new BinaryReader(fileStream);
+            FileStream fileStream = new FileStream(imageFilePath, FileMode.Open, FileAccess.Read);
+            BinaryReader binaryReader = new BinaryReader(fileStream);
             return binaryReader.ReadBytes((int)fileStream.Length);
         }
 
         private async Task<AnalysisResult> AnalyzeImage()
         {
-            // VisualizeResult(e.Frame);
-
-            //
+            // TASK maybe reconsider the source of the image to be analyzed , 
+            // currently the image being sent to the vision API has be scaled to fit to window
             Image workImage = (Image)GetResultImage().Clone();
+            //Image workImage = txtPicFilename;
+            string CSKey = _options.CSKey;
+            FaceServiceClient faceClient = _options._faceServiceClient;
+            PersonGroup[] personGroups = Array.Empty<PersonGroup>();
+            personGroups = await GenLib.GetPersonGroups(CSKey, faceClient);
+
+            //uncumment below for testing
+
+            //comment below out for testing
             Tuple<string, AnalysisResult> result = await MakeAnalysisRequest(workImage);
             if (!result.Equals(null))
             {
@@ -535,7 +548,7 @@ namespace GetImageMetaData
                     // Question : This seems to be the cause of the issue
                     //var detectedFaces = await DetectFaces(picView.Image);
                     Size size = workImage.Size;
-                    EnhancedFace[] detectedFaces = await GenLib.DetectFaces(workImage);
+                    EnhancedFace[] detectedFaces = await GenLib.DetectFaces(workImage, faceClient);
 
                     // save off our detected faces so that we can use it for our tooltip
                     _detectedFaces = detectedFaces;
@@ -545,7 +558,7 @@ namespace GetImageMetaData
                     if (detectedFaces.Any())
                     {
                         // TASK error with https://chainimage.com/images/large-group-of-happy-people-standing-together.jpg
-                        List<IdentifiedPerson> identified = await GenLib.GetCandidateNames(detectedFaces);
+                        List<IdentifiedPerson> identified = await GenLib.GetCandidateNames(detectedFaces, personGroups, faceClient);
                         txtFaceNames.Text = detectedFaces.Any()
                             ? string.Join(", ", identified.Select(c => $"{c.PersonName} ({c.GroupName})"))
                             : "unknown";
@@ -641,8 +654,10 @@ namespace GetImageMetaData
 
         private async Task DeletePersonAsync(string faceImageFn, string personName)
         {
+            string CSKey = _options.CSKey;
+            FaceServiceClient faceClient = _options._faceServiceClient;
             PersonGroup[] personGroups = Array.Empty<PersonGroup>();
-            personGroups = await GenLib.GetPersonGroups();
+            personGroups = await GenLib.GetPersonGroups(CSKey, faceClient);
             List<string> namesFound = new List<string>();
             List<IdentifiedPerson> groupInfo = new List<IdentifiedPerson>();
             bool personFound = false;
@@ -689,52 +704,82 @@ namespace GetImageMetaData
 
         private async void CmdBrowse_ClickAsync(object sender, EventArgs e)
         {
-            txtFaceNames.Clear();
-            txtDescription.Clear();
-            txtResults.Clear();
-            picViewResult.Image = null;
-             
-            string filePath = SetFilePath();
-            _ext = GetExtension();
+            bool internet = _options.Internet;
+            bool containerMode = _options.ContainerMode;
+            string msgType4 = "Internet";
 
-            bool webimage = filePath.StartsWith("www") || filePath.StartsWith("http");
-
-
-            bool isDocument = DOC_TYPES.Contains(_ext);
-            string source = webimage.Equals(true) ? "WEB" : isDocument.Equals(true) ? "DOC" : cmbSource.Text.ToUpper() ;
             
-            switch (source)
+                txtFaceNames.Clear();
+                txtDescription.Clear();
+                txtResults.Clear();
+                picViewResult.Image = null;
+
+                string filePath = SetFilePath();
+                _ext = GetExtension();
+
+                bool webimage = filePath.StartsWith("www") || filePath.StartsWith("http");
+
+                bool isDocument = DOC_TYPES.Contains(_ext);
+                string source = webimage.Equals(true) ? "WEB" : isDocument.Equals(true) ? "DOC" : cmbSource.Text.ToUpper();
+
+            if (containerMode)
             {
-                case "FILE":
-                    var dlg = new OpenFileDialog
-                    {
-                        Filter = $@"jpg|*.jpg|png|*.png|bmp|*.bmp|gif|*.gif|mp4|*.mp4|mov|*.mov|ts|*.ts|h64|*.h64|avi|*.avi"
-                    };
-                    var result = dlg.ShowDialog();
-                    if (result != DialogResult.OK) return;
-                    filePath = dlg.FileName;
-                    await SetPicViewAsync(filePath);
-                    
-                    cmdAnalyze.Enabled = !string.IsNullOrWhiteSpace(filePath);
-                    cmdRotateImg.Enabled = !string.IsNullOrWhiteSpace(filePath);
-                    break;
-                case "WEB":
-                    {
+                switch (source)
+                {
+                    case "FILE":
+                        var dlg = new OpenFileDialog
+                        {
+                            Filter = $@"jpg|*.jpg|png|*.png|bmp|*.bmp|gif|*.gif|mp4|*.mp4|mov|*.mov|ts|*.ts|h64|*.h64|avi|*.avi"
+                        };
+                        DialogResult result = dlg.ShowDialog();
+                        if (result != DialogResult.OK) return;
+                        filePath = dlg.FileName;
                         await SetPicViewAsync(filePath);
-                        cmdAnalyze.Enabled = !string.IsNullOrWhiteSpace(filePath);
-                    }
-                    break;
-                case "DOC":
-                    {
-                        await SetPicViewAsync(filePath);
-                        cmdAnalyze.Enabled = !string.IsNullOrWhiteSpace(filePath);
-                    }
-                    break;
-                default:
 
-                    break;
+                        cmdAnalyze.Enabled = !string.IsNullOrWhiteSpace(filePath);
+                        cmdRotateImg.Enabled = !string.IsNullOrWhiteSpace(filePath);
+                        break;
+                }
             }
+            else if (internet)
+            {
+                switch (source)
+                {
+                    case "FILE":
+                        var dlg = new OpenFileDialog
+                        {
+                            Filter = $@"jpg|*.jpg|png|*.png|bmp|*.bmp|gif|*.gif|mp4|*.mp4|mov|*.mov|ts|*.ts|h64|*.h64|avi|*.avi"
+                        };
+                        DialogResult result = dlg.ShowDialog();
+                        if (result != DialogResult.OK) return;
+                        filePath = dlg.FileName;
+                        await SetPicViewAsync(filePath);
 
+                        cmdAnalyze.Enabled = !string.IsNullOrWhiteSpace(filePath);
+                        cmdRotateImg.Enabled = !string.IsNullOrWhiteSpace(filePath);
+                        break;
+
+                    case "WEB":
+                        {
+                            await SetPicViewAsync(filePath);
+                            cmdAnalyze.Enabled = !string.IsNullOrWhiteSpace(filePath);
+                        }
+                        break;
+                    case "DOC":
+                        {
+                            await SetPicViewAsync(filePath);
+                            cmdAnalyze.Enabled = !string.IsNullOrWhiteSpace(filePath);
+                        }
+                        break;
+                    default:
+                        // should there be a Default action?
+                        break;
+                }
+            }
+            else
+            {
+                MessageBox.Show(GenLib.SetMessage(msgType4, string.Empty, string.Empty, null));
+            }
         }
 
         private async Task<AnalysisResult> CameraAnalysisFunction(VideoFrame frame)
@@ -748,7 +793,7 @@ namespace GetImageMetaData
         {
             txtPicFilename.Text = filePath;
 
-            eMediaType imageType = GetImageType();
+            EMediaType imageType = GetImageType();
             byte[] imageData = null;
             MemoryStream ms;
             Bitmap imgBmp;
@@ -756,11 +801,7 @@ namespace GetImageMetaData
             switch (imageType)
             {
                 
-                case eMediaType.Image:
-                    //var selImage = PrepareImage(filePath);
-                    //SetResultImage(selImage);
-
-
+                case EMediaType.Image:
                     imageData = null;
                     //Bitmap[] imageData = null;
 
@@ -774,31 +815,29 @@ namespace GetImageMetaData
 
                     break;
 
-                case eMediaType.Web:
+                case EMediaType.Web:
                     if (IMAGE_TYPES.Contains(_ext))
                     {
                         imageData = null;
                         //Bitmap[] imageData = null;
 
-                        using (var wc = new System.Net.WebClient())
+                        using (System.Net.WebClient wc = new System.Net.WebClient())
                         imageData = wc.DownloadData(filePath);
                         ms = new MemoryStream(imageData);
                         imgBmp = new Bitmap(ms);
                         selImage = PrepareImage(imgBmp);
                         SetResultImage(selImage);
-
                     }
                     break;
 
-                case eMediaType.Doc:
+                case EMediaType.Doc:
                     var fileStream = new FileStream(filePath, FileMode.Open);
                     var docImage = Image.FromStream(fileStream);
                     //selImage = PrepareImage(docImage);
                     SetResultImage(docImage);
-
                     break;
 
-                case eMediaType.Video:
+                case EMediaType.Video:
                     var rtsp = txtPicFilename.Text;
                     InitializeCameraFeedAsync();
                     // FIX Needs to be awaited 
@@ -809,11 +848,10 @@ namespace GetImageMetaData
 
                     // comment this function out if you don't want automatic analysis to happen - knh 9/11/2018
                     _grabber.AnalysisFunction = CameraAnalysisFunction; // AllApiFunction;
-
                     break;
 
                 #region eMediaType.Unknown: - Currently not defined
-                case eMediaType.Unknown:
+                case EMediaType.Unknown:
                     // must handle this error later
                     break;
                     #endregion
@@ -822,8 +860,7 @@ namespace GetImageMetaData
 
         private Image PrepareImage(string fileName)
         {
-            var selImage = Image.FromFile(fileName);
-            //var selImage = Image;
+            Image selImage = Image.FromFile(fileName);
             int pvHeight = picViewResult.Size.Height;
             int pvWidth = picViewResult.Size.Width;
             int selImageHeight = selImage.Size.Height;
@@ -831,8 +868,6 @@ namespace GetImageMetaData
             bool selImageToohigh = selImageHeight > pvHeight;
             bool selImageTooWide = selImageWidth > pvWidth;
 
-
-            //var resizedImage = selImage;
             if (selImageToohigh || selImageTooWide) // Image Height is bigger than the Pic Window Height
             {
                 // only Image Height is bigger than the Pic Window Height
@@ -847,23 +882,21 @@ namespace GetImageMetaData
             {
                 return selImage;
             }
-
-            //return selImage;
         }
 
         private Image PrepareImage(Bitmap image)
         {
-            // TASK need to verify that the current image being displayed in the picViewResult needs to be resized
-            var selImage = image;
-            //int pvHeight = GetResultImage().Size.Height;
-            //int pvWidth = GetResultImage().Size.Width;
+            // TASK currently the image being sent to the Vision API is dependant on the size of the Display,
+            // So results change depending on the size of the image being sent.
+            // Need to set the image to fit to window but send the image at max size to the 
+            //vision and face api and get resize the result to fit in the window replacing the iniatial image.
+            Bitmap selImage = image;
             int pvHeight = picViewResult.Size.Height;
             int pvWidth = picViewResult.Size.Width;
             int selImageHeight = selImage.Size.Height;
             int selImageWidth = selImage.Size.Width;
             bool selImageToohigh = selImageHeight > pvHeight;
             bool selImageTooWide = selImageWidth > pvWidth;
-
             
             if (selImageToohigh || selImageTooWide) // image does not fit in the window
             {
@@ -878,13 +911,12 @@ namespace GetImageMetaData
 
         private async void CmdAnalyze_Click(object sender, EventArgs e)
         {
-
             Cursor = Cursors.WaitCursor;
-            var imageType = GetImageType();
+            EMediaType imageType = GetImageType();
             
             switch (imageType)
             {
-                case eMediaType.Image:
+                case EMediaType.Image:
                     {
                         // make sure that all camera processing is stopped before we move to single image processing
                         await _grabber.StopProcessingAsync();                      
@@ -892,19 +924,19 @@ namespace GetImageMetaData
                     }
                     break;
 
-                case eMediaType.Web:
+                case EMediaType.Web:
                     {
                         await AnalyzeImage();
                     }
                     break;
 
-                case eMediaType.Video:
+                case EMediaType.Video:
                     {
 
                     }
                     break;
 
-                case eMediaType.Camera:
+                case EMediaType.Camera:
                     {
                         // take snapshot of preview window and put in result window
                         SetResultImage(picPreview.Image);
@@ -914,13 +946,12 @@ namespace GetImageMetaData
                     }
                     break;
             }
-
             Cursor = Cursors.Arrow;
         }
 
-        private eMediaType GetImageType()
+        private EMediaType GetImageType()
         {
-            eMediaType mediaType = eMediaType.Unknown;
+            EMediaType mediaType = EMediaType.Unknown;
             _ext = GetExtension();
 
             string filePath = SetFilePath();
@@ -931,23 +962,22 @@ namespace GetImageMetaData
             {
                 case "FILE":
                     if (IMAGE_TYPES.Contains(_ext))
-                        mediaType = eMediaType.Image;
+                        mediaType = EMediaType.Image;
                     else if (VIDEO_TYPES.Contains(_ext))
-                        mediaType = eMediaType.Video;
+                        mediaType = EMediaType.Video;
                     else if (DOC_TYPES.Contains(_ext))
-                        mediaType = eMediaType.Doc;
+                        mediaType = EMediaType.Doc;
                     else
-                        mediaType = eMediaType.Unknown;
+                        mediaType = EMediaType.Unknown;
                     break;
                 case "WEB":
-                    mediaType = eMediaType.Web;
+                    mediaType = EMediaType.Web;
                     break;
                 default:
-                    mediaType = eMediaType.Camera;
+                    mediaType = EMediaType.Camera;
                     break;
             }
             return mediaType;
-
         }
 
         private string SetFilePath()
@@ -963,10 +993,6 @@ namespace GetImageMetaData
         private string ResultToStr(AnalysisResult result)
         {
             return JsonConvert.SerializeObject(result, Formatting.Indented); // Convert.ToString(result);
-            //StringBuilder s = new StringBuilder();
-
-            //s.AppendLine(string.Join(", ", result.Description.Captions));
-
         }
 
         private string InFace(int x, int y, out int faceSeq)
@@ -1000,6 +1026,7 @@ namespace GetImageMetaData
 
         private async void ContextMenuStrip1_ItemClickedAsync(object sender, ToolStripItemClickedEventArgs e)
         {
+            FaceServiceClient FaceClient = _options._faceServiceClient;
             switch (e.ClickedItem.Name)
             {
                 case "menuItemDeleteFace":
@@ -1027,7 +1054,7 @@ namespace GetImageMetaData
                         frmAddFace frm = new frmAddFace();
 
                         // tuple item1 is the name to add, item2 is the group id to add
-                        Tuple<string, string> nameInfoToAdd = frm.PromptForName(_options._faceServiceClient);
+                        Tuple<string, string> nameInfoToAdd = frm.PromptForName(FaceClient);
                         if (nameInfoToAdd.Item1 != string.Empty)
                         {
                             // user has entered a valid name to add - call our method to add this instance of the face to the face id
@@ -1041,12 +1068,12 @@ namespace GetImageMetaData
                             // try - Add personFace to a personGroup if the personGroup exist
                             try
                             {
-                                PersonGroup personGroupInfo = await _options._faceServiceClient.GetPersonGroupAsync(personGroup);
+                                PersonGroup personGroupInfo = await FaceClient.GetPersonGroupAsync(personGroup);
 
                                 string personGroupDN = personGroupInfo.Name;
 
-                                await GenLib.AddFace(destFn, personName, personGroup, personGroupDN);
-                                await UpdatePersonListAsync(personGroup);
+                                await GenLib.AddFace(destFn, personName, personGroup, personGroupDN, FaceClient);
+                                await UpdatePersonListAsync(personGroup, _options.personGroupFound);
                                 //await AddFace(destFn, nameToAdd);
                             }
                             // catch Create personGroup and add the personFace
@@ -1055,10 +1082,10 @@ namespace GetImageMetaData
                                 try
                                 {
                                     // person group does not exist - create it
-                                    await _options._faceServiceClient.CreatePersonGroupAsync(personGroup, personGroup);
+                                    await FaceClient.CreatePersonGroupAsync(personGroup, personGroup);
                                     await TrainPersonGroup(personGroup);
                                     await GetTrainingStatus(personGroup);
-                                    await GenLib.AddFace(destFn, personName, personGroup, personGroup);
+                                    await GenLib.AddFace(destFn, personName, personGroup, personGroup, FaceClient);
                                     await UpdatePersonListAsync();
                                 }
                                 catch (Exception ex)
@@ -1083,9 +1110,8 @@ namespace GetImageMetaData
             switch (source)
             {
                 case "FILE":
-                    
                      //toggle UI since file has been activated
-                    toggleUI(false);
+                    ToggleUI(false);
 
                     cmdBrowse.Text = $@"Choose File...";
                     if (cameraProcessing)
@@ -1098,7 +1124,7 @@ namespace GetImageMetaData
                     break;
 
                 default:
-                    toggleUI(true);
+                    ToggleUI(true);
 
                     tableLayoutPanel1.ColumnStyles[0].Width = 50;
 
@@ -1106,9 +1132,8 @@ namespace GetImageMetaData
                     {
                         txtPicFilename.Text = null;
                     }
-
                     int cameraIndex = 0;
-                    var rtsp = string.Empty;
+                    string rtsp = string.Empty;
 
                     if (cmbSource.Text.StartsWith("Camera", StringComparison.OrdinalIgnoreCase))
                     {
@@ -1116,7 +1141,6 @@ namespace GetImageMetaData
                         //cameraIndex = cmbSource.Text.Equals("Camera 1", StringComparison.OrdinalIgnoreCase) ? 0 : 1;
                         var split = cmbSource.Text.Split();
                         cameraIndex = Convert.ToInt32(split[1]) + -1;
-
                     }
                     else
                     {
@@ -1132,13 +1156,10 @@ namespace GetImageMetaData
 
                     break;
             }
-
             SetResultImage(null);
-
         }
 
-
-        private void toggleUI(bool isCamera)
+        private void ToggleUI(bool isCamera)
         {
             cmdBrowse.Visible = !isCamera;
             cmdRotateImg.Visible = !isCamera;
@@ -1173,7 +1194,7 @@ namespace GetImageMetaData
                     new FaceRectangle { Left = r.Left, Top = r.Top, Width = r.Width, Height = r.Height };
             }
         }
-
+ 
         public bool IsPasswordRevealButtonEnabled { get; set; }
         public string SetRtspStream()
         {
@@ -1222,7 +1243,6 @@ namespace GetImageMetaData
 
                 if (int.TryParse(chsel, out var i)) ch = i;
             }
-
             return ch;
         }
 
@@ -1253,14 +1273,12 @@ namespace GetImageMetaData
                 }
             }
             
-
             cmbSource.Items.Clear();
             cmbSource.Items.Add("File");
             foreach (string camera in listData)
             {
                 cmbSource.Items.Add(camera);
             }
-
         }
         private void InitializeCameraFeedAsync()
         {
@@ -1273,50 +1291,47 @@ namespace GetImageMetaData
                 // manual mode 
                 _grabber.TriggerAnalysisOnInterval(TimeSpan.FromMilliseconds(0)); 
 
-
             // Needs to be Reset message. 
             lstLog.Text = string.Empty;
 
             // Set up a listener for when we acquire a new frame.
 
             // Set up a listener for when the client receives a new frame.
-            EventHandler<FrameGrabber<LiveCameraResult>.NewFrameEventArgs> p = (s, e) =>
+            void p(object s, FrameGrabber<LiveCameraResult>.NewFrameEventArgs e)
+            {
+                //picPreview.BeginInvoke((Action) () => picPreview.Image = e.Frame.Image.Clone().ToBitmap()));
+                //The callback may occur on a different thread, so we must use the
+                // MainWindow.Dispatcher when manipulating the UI.
+                try
                 {
-                    //picPreview.BeginInvoke((Action) () => picPreview.Image = e.Frame.Image.Clone().ToBitmap()));
-                    //The callback may occur on a different thread, so we must use the
-                    // MainWindow.Dispatcher when manipulating the UI.
-                    try
-                    {
-                        picPreview.BeginInvoke
-                            (
-                                (Action)
-                                    (() =>
-                                       {
+                    picPreview.BeginInvoke
+                        (
+                            (Action)
+                                (() =>
+                                   {
                                            // NEEDS FIXED
                                            // Need to stop when video has ended 
                                            // error when video ends ($exception).Message Parameter is not valid.
                                            if (e.Frame.Image.Height != 0 && e.Frame.Image.Width != 0)
-                                           {
-                                               picPreview.Image = e.Frame.Image.Clone().ToBitmap();
-                                           }
+                                       {
+                                           picPreview.Image = e.Frame.Image.Clone().ToBitmap();
                                        }
-                                    )
-                            );
-                    }
-                    catch
-                    {
-                        // ignored
-                    }
-                };
+                                   }
+                                )
+                        );
+                }
+                catch
+                {
+                    // ignored
+                }
+            }
             _grabber.NewFrameProvided += p;
-
         }
 
         protected virtual void OnPropertyChanged(PropertyChangedEventArgs e)
         {
             _propertyChanged?.Invoke(this, e);
         }
-
 
         private void SetResultImage(Image img)
         {
@@ -1326,15 +1341,10 @@ namespace GetImageMetaData
             //}
         }
 
-
         private Image GetResultImage()
         {
-            //lock (lockObj)
-            //{
-                return picViewResult.Image;
-            //}
+            return picViewResult.Image;
         }
-
 
         private System.Drawing.Size GetResultImageSize()
         {
@@ -1344,33 +1354,32 @@ namespace GetImageMetaData
             //}
         }
 
-        private void cmbCameraMode_SelectedIndexChanged(object sender, EventArgs e)
+        private void CmbCameraMode_SelectedIndexChanged(object sender, EventArgs e)
         {
             _cameraModeAuto = cmbCameraMode.Text.Equals("Auto", StringComparison.OrdinalIgnoreCase);
             InitializeCameraFeedAsync();
         }
 
-        private void trainFromWebToolStripMenuItem_Click(object sender, EventArgs e)
+        private void TrainFromWebToolStripMenuItem_Click(object sender, EventArgs e)
         {
             new FrmTrainFromWeb().ShowDialog();
         }
 
-        private void trainFromO365StripMenuItem_Click(object sender, EventArgs e)
+        private void TrainFromO365StripMenuItem_Click(object sender, EventArgs e)
         {
             new frmTrainFromO365().ShowDialog();
         }
 
-        private void cmdClearPersonsList_Click(object sender, EventArgs e)
+        private void CmdClearPersonsList_Click(object sender, EventArgs e)
         {
             //cmbPersonName.Items.Clear();
             //UpdatePersonListAsync();
         }
 
-        private void categorizeFilesToolStripMenuItem_Click(object sender, EventArgs e)
+        private void CategorizeFilesToolStripMenuItem_Click(object sender, EventArgs e)
         {
             frmCategorizeFiles frm = new frmCategorizeFiles();
             frm.HandleCategorizeFiles(_personsInActiveGroup, MAX_IMAGE_SIZE);
         }
     } // namespace
-
 } // class

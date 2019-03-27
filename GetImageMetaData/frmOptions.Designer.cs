@@ -62,19 +62,14 @@ namespace GetImageMetaData
             this.cmdSave = new System.Windows.Forms.Button();
             this.cmdCancel = new System.Windows.Forms.Button();
             this.tabAzureCosmosDB = new System.Windows.Forms.TabPage();
-            this.txtCosmosDataBasePrimConString = new System.Windows.Forms.TextBox();
             this.label28 = new System.Windows.Forms.Label();
             this.label29 = new System.Windows.Forms.Label();
-            this.txtCosmosDataBasePrimKey = new System.Windows.Forms.TextBox();
             this.label30 = new System.Windows.Forms.Label();
-            this.txtCosmosDataBaseURI = new System.Windows.Forms.TextBox();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabCognitiveServicesAPI = new System.Windows.Forms.TabPage();
             this.label27 = new System.Windows.Forms.Label();
             this.label31 = new System.Windows.Forms.Label();
             this.label32 = new System.Windows.Forms.Label();
-            this.txtCognitiveServicesAPIKey = new System.Windows.Forms.TextBox();
-            this.txtCognitiveServicesEndpoint = new System.Windows.Forms.TextBox();
             this.tabPersonGroups = new System.Windows.Forms.TabPage();
             this.cmdUpdateGroup = new System.Windows.Forms.Button();
             this.cmdSetColor = new System.Windows.Forms.Button();
@@ -83,8 +78,6 @@ namespace GetImageMetaData
             this.cmdUpdate = new System.Windows.Forms.Button();
             this.label7 = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
-            this.cmbPersonGroups = new System.Windows.Forms.ComboBox();
-            this.txtPersonGroupDisplay = new System.Windows.Forms.TextBox();
             this.tabCameras = new System.Windows.Forms.TabPage();
             this.label22 = new System.Windows.Forms.Label();
             this.label21 = new System.Windows.Forms.Label();
@@ -100,21 +93,29 @@ namespace GetImageMetaData
             this.label14 = new System.Windows.Forms.Label();
             this.txtAnalyzeTime = new System.Windows.Forms.TextBox();
             this.label13 = new System.Windows.Forms.Label();
-            this.txtIPcamPassword = new System.Windows.Forms.TextBox();
             this.txtDVRChannels = new System.Windows.Forms.TextBox();
-            this.txtDVRPassword = new System.Windows.Forms.TextBox();
             this.label12 = new System.Windows.Forms.Label();
             this.label11 = new System.Windows.Forms.Label();
             this.label10 = new System.Windows.Forms.Label();
             this.label9 = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
+            this.colorDialog1 = new System.Windows.Forms.ColorDialog();
+            this.chbContainerMode = new System.Windows.Forms.CheckBox();
+            this.txtCognitiveServicesAPIKey = new System.Windows.Forms.TextBox();
+            this.txtCognitiveServicesEndpoint = new System.Windows.Forms.TextBox();
+            this.cmbPersonGroups = new System.Windows.Forms.ComboBox();
+            this.txtPersonGroupDisplay = new System.Windows.Forms.TextBox();
+            this.txtIPcamPassword = new System.Windows.Forms.TextBox();
+            this.txtDVRPassword = new System.Windows.Forms.TextBox();
             this.txtOther = new System.Windows.Forms.TextBox();
             this.txtIPCamUserName = new System.Windows.Forms.TextBox();
             this.txtIPCamIp = new System.Windows.Forms.TextBox();
             this.txtDVRUserName = new System.Windows.Forms.TextBox();
             this.txtDVRIP = new System.Windows.Forms.TextBox();
-            this.colorDialog1 = new System.Windows.Forms.ColorDialog();
+            this.txtCosmosDataBasePrimConString = new System.Windows.Forms.TextBox();
+            this.txtCosmosDataBasePrimKey = new System.Windows.Forms.TextBox();
+            this.txtCosmosDataBaseURI = new System.Windows.Forms.TextBox();
             this.tabAzureCosmosDB.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabCognitiveServicesAPI.SuspendLayout();
@@ -126,20 +127,20 @@ namespace GetImageMetaData
             // 
             this.cmdSave.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.cmdSave.Location = new System.Drawing.Point(768, 637);
-            this.cmdSave.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.cmdSave.Margin = new System.Windows.Forms.Padding(4);
             this.cmdSave.Name = "cmdSave";
             this.cmdSave.Size = new System.Drawing.Size(128, 38);
             this.cmdSave.TabIndex = 0;
             this.cmdSave.Text = "&Save";
             this.cmdSave.UseVisualStyleBackColor = true;
-            this.cmdSave.Click += new System.EventHandler(this.cmdSave_ClickAsync);
+            this.cmdSave.Click += new System.EventHandler(this.CmdSave_ClickAsync);
             // 
             // cmdCancel
             // 
             this.cmdCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.cmdCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.cmdCancel.Location = new System.Drawing.Point(902, 637);
-            this.cmdCancel.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.cmdCancel.Margin = new System.Windows.Forms.Padding(4);
             this.cmdCancel.Name = "cmdCancel";
             this.cmdCancel.Size = new System.Drawing.Size(128, 38);
             this.cmdCancel.TabIndex = 1;
@@ -155,23 +156,12 @@ namespace GetImageMetaData
             this.tabAzureCosmosDB.Controls.Add(this.label30);
             this.tabAzureCosmosDB.Controls.Add(this.txtCosmosDataBaseURI);
             this.tabAzureCosmosDB.Location = new System.Drawing.Point(8, 39);
-            this.tabAzureCosmosDB.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabAzureCosmosDB.Margin = new System.Windows.Forms.Padding(4);
             this.tabAzureCosmosDB.Name = "tabAzureCosmosDB";
             this.tabAzureCosmosDB.Size = new System.Drawing.Size(964, 543);
             this.tabAzureCosmosDB.TabIndex = 3;
             this.tabAzureCosmosDB.Text = "Azure Cosmos DB";
             this.tabAzureCosmosDB.UseVisualStyleBackColor = true;
-            // 
-            // txtCosmosDataBasePrimConString
-            // 
-            this.txtCosmosDataBasePrimConString.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::GetImageMetaData.Properties.Settings.Default, "cosmosPrimaryConString", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
-            this.txtCosmosDataBasePrimConString.Location = new System.Drawing.Point(22, 237);
-            this.txtCosmosDataBasePrimConString.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.txtCosmosDataBasePrimConString.Name = "txtCosmosDataBasePrimConString";
-            this.txtCosmosDataBasePrimConString.PasswordChar = '*';
-            this.txtCosmosDataBasePrimConString.Size = new System.Drawing.Size(728, 31);
-            this.txtCosmosDataBasePrimConString.TabIndex = 29;
-            this.txtCosmosDataBasePrimConString.Text = global::GetImageMetaData.Properties.Settings.Default.cosmosPrimaryConString;
             // 
             // label28
             // 
@@ -193,17 +183,6 @@ namespace GetImageMetaData
             this.label29.TabIndex = 28;
             this.label29.Text = "Cosmos DB Primary Key";
             // 
-            // txtCosmosDataBasePrimKey
-            // 
-            this.txtCosmosDataBasePrimKey.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::GetImageMetaData.Properties.Settings.Default, "cosmosPrimaryKey", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
-            this.txtCosmosDataBasePrimKey.Location = new System.Drawing.Point(22, 144);
-            this.txtCosmosDataBasePrimKey.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.txtCosmosDataBasePrimKey.Name = "txtCosmosDataBasePrimKey";
-            this.txtCosmosDataBasePrimKey.PasswordChar = '*';
-            this.txtCosmosDataBasePrimKey.Size = new System.Drawing.Size(728, 31);
-            this.txtCosmosDataBasePrimKey.TabIndex = 27;
-            this.txtCosmosDataBasePrimKey.Text = global::GetImageMetaData.Properties.Settings.Default.cosmosPrimaryKey;
-            // 
             // label30
             // 
             this.label30.AutoSize = true;
@@ -213,16 +192,6 @@ namespace GetImageMetaData
             this.label30.Size = new System.Drawing.Size(166, 25);
             this.label30.TabIndex = 26;
             this.label30.Text = "Cosmos DB URI";
-            // 
-            // txtCosmosDataBaseURI
-            // 
-            this.txtCosmosDataBaseURI.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::GetImageMetaData.Properties.Settings.Default, "cosmosDataBaseURI", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
-            this.txtCosmosDataBaseURI.Location = new System.Drawing.Point(22, 56);
-            this.txtCosmosDataBaseURI.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.txtCosmosDataBaseURI.Name = "txtCosmosDataBaseURI";
-            this.txtCosmosDataBaseURI.Size = new System.Drawing.Size(728, 31);
-            this.txtCosmosDataBaseURI.TabIndex = 25;
-            this.txtCosmosDataBaseURI.Text = global::GetImageMetaData.Properties.Settings.Default.cosmosDataBaseURI;
             // 
             // tabControl1
             // 
@@ -234,7 +203,7 @@ namespace GetImageMetaData
             this.tabControl1.Controls.Add(this.tabCameras);
             this.tabControl1.Controls.Add(this.tabAzureCosmosDB);
             this.tabControl1.Location = new System.Drawing.Point(32, 31);
-            this.tabControl1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabControl1.Margin = new System.Windows.Forms.Padding(4);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
             this.tabControl1.Size = new System.Drawing.Size(980, 590);
@@ -242,13 +211,14 @@ namespace GetImageMetaData
             // 
             // tabCognitiveServicesAPI
             // 
+            this.tabCognitiveServicesAPI.Controls.Add(this.chbContainerMode);
             this.tabCognitiveServicesAPI.Controls.Add(this.label27);
             this.tabCognitiveServicesAPI.Controls.Add(this.label31);
             this.tabCognitiveServicesAPI.Controls.Add(this.label32);
             this.tabCognitiveServicesAPI.Controls.Add(this.txtCognitiveServicesAPIKey);
             this.tabCognitiveServicesAPI.Controls.Add(this.txtCognitiveServicesEndpoint);
             this.tabCognitiveServicesAPI.Location = new System.Drawing.Point(8, 39);
-            this.tabCognitiveServicesAPI.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.tabCognitiveServicesAPI.Margin = new System.Windows.Forms.Padding(6);
             this.tabCognitiveServicesAPI.Name = "tabCognitiveServicesAPI";
             this.tabCognitiveServicesAPI.Size = new System.Drawing.Size(964, 543);
             this.tabCognitiveServicesAPI.TabIndex = 6;
@@ -287,27 +257,6 @@ namespace GetImageMetaData
             this.label32.TabIndex = 35;
             this.label32.Text = "Cognitive Services API Key";
             // 
-            // txtCognitiveServicesAPIKey
-            // 
-            this.txtCognitiveServicesAPIKey.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::GetImageMetaData.Properties.Settings.Default, "cognitiveServicesKey", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
-            this.txtCognitiveServicesAPIKey.Location = new System.Drawing.Point(32, 60);
-            this.txtCognitiveServicesAPIKey.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.txtCognitiveServicesAPIKey.Name = "txtCognitiveServicesAPIKey";
-            this.txtCognitiveServicesAPIKey.PasswordChar = '*';
-            this.txtCognitiveServicesAPIKey.Size = new System.Drawing.Size(728, 31);
-            this.txtCognitiveServicesAPIKey.TabIndex = 34;
-            this.txtCognitiveServicesAPIKey.Text = global::GetImageMetaData.Properties.Settings.Default.cognitiveServicesKey;
-            // 
-            // txtCognitiveServicesEndpoint
-            // 
-            this.txtCognitiveServicesEndpoint.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::GetImageMetaData.Properties.Settings.Default, "cognitiveServicesEndpoint", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
-            this.txtCognitiveServicesEndpoint.Location = new System.Drawing.Point(30, 146);
-            this.txtCognitiveServicesEndpoint.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.txtCognitiveServicesEndpoint.Name = "txtCognitiveServicesEndpoint";
-            this.txtCognitiveServicesEndpoint.Size = new System.Drawing.Size(728, 31);
-            this.txtCognitiveServicesEndpoint.TabIndex = 36;
-            this.txtCognitiveServicesEndpoint.Text = global::GetImageMetaData.Properties.Settings.Default.cognitiveServicesEndpoint;
-            // 
             // tabPersonGroups
             // 
             this.tabPersonGroups.Controls.Add(this.cmdUpdateGroup);
@@ -320,9 +269,9 @@ namespace GetImageMetaData
             this.tabPersonGroups.Controls.Add(this.cmbPersonGroups);
             this.tabPersonGroups.Controls.Add(this.txtPersonGroupDisplay);
             this.tabPersonGroups.Location = new System.Drawing.Point(8, 39);
-            this.tabPersonGroups.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.tabPersonGroups.Margin = new System.Windows.Forms.Padding(6);
             this.tabPersonGroups.Name = "tabPersonGroups";
-            this.tabPersonGroups.Padding = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.tabPersonGroups.Padding = new System.Windows.Forms.Padding(6);
             this.tabPersonGroups.Size = new System.Drawing.Size(964, 543);
             this.tabPersonGroups.TabIndex = 5;
             this.tabPersonGroups.Text = "Person Groups";
@@ -333,24 +282,24 @@ namespace GetImageMetaData
             this.cmdUpdateGroup.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.cmdUpdateGroup.Location = new System.Drawing.Point(426, 256);
-            this.cmdUpdateGroup.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.cmdUpdateGroup.Margin = new System.Windows.Forms.Padding(4);
             this.cmdUpdateGroup.Name = "cmdUpdateGroup";
             this.cmdUpdateGroup.Size = new System.Drawing.Size(244, 40);
             this.cmdUpdateGroup.TabIndex = 43;
             this.cmdUpdateGroup.Text = "Update Person Group";
             this.cmdUpdateGroup.UseVisualStyleBackColor = true;
-            this.cmdUpdateGroup.Click += new System.EventHandler(this.cmdUpdateGroup_ClickAsync);
+            this.cmdUpdateGroup.Click += new System.EventHandler(this.CmdUpdateGroup_ClickAsync);
             // 
             // cmdSetColor
             // 
             this.cmdSetColor.BackColor = System.Drawing.Color.Green;
             this.cmdSetColor.Location = new System.Drawing.Point(20, 256);
-            this.cmdSetColor.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.cmdSetColor.Margin = new System.Windows.Forms.Padding(4);
             this.cmdSetColor.Name = "cmdSetColor";
             this.cmdSetColor.Size = new System.Drawing.Size(272, 44);
             this.cmdSetColor.TabIndex = 42;
             this.cmdSetColor.UseVisualStyleBackColor = false;
-            this.cmdSetColor.Click += new System.EventHandler(this.cmdSetColor_Click);
+            this.cmdSetColor.Click += new System.EventHandler(this.CmdSetColor_Click);
             // 
             // label16
             // 
@@ -368,26 +317,26 @@ namespace GetImageMetaData
             // 
             this.cmdDeleteGroup.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.cmdDeleteGroup.Location = new System.Drawing.Point(736, 52);
-            this.cmdDeleteGroup.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.cmdDeleteGroup.Margin = new System.Windows.Forms.Padding(4);
             this.cmdDeleteGroup.Name = "cmdDeleteGroup";
             this.cmdDeleteGroup.Size = new System.Drawing.Size(220, 40);
             this.cmdDeleteGroup.TabIndex = 38;
             this.cmdDeleteGroup.Text = "&Delete Group";
             this.cmdDeleteGroup.UseVisualStyleBackColor = true;
-            this.cmdDeleteGroup.Click += new System.EventHandler(this.cmdDeleteGroup_ClickAsync);
+            this.cmdDeleteGroup.Click += new System.EventHandler(this.CmdDeleteGroup_ClickAsync);
             // 
             // cmdUpdate
             // 
             this.cmdUpdate.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.cmdUpdate.Location = new System.Drawing.Point(426, 52);
-            this.cmdUpdate.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.cmdUpdate.Margin = new System.Windows.Forms.Padding(4);
             this.cmdUpdate.Name = "cmdUpdate";
             this.cmdUpdate.Size = new System.Drawing.Size(220, 40);
             this.cmdUpdate.TabIndex = 37;
             this.cmdUpdate.Text = "Refresh Groups";
             this.cmdUpdate.UseVisualStyleBackColor = true;
-            this.cmdUpdate.Click += new System.EventHandler(this.cmdUpdate_ClickAsync);
+            this.cmdUpdate.Click += new System.EventHandler(this.CmdUpdate_ClickAsync);
             // 
             // label7
             // 
@@ -412,33 +361,6 @@ namespace GetImageMetaData
             this.label6.Size = new System.Drawing.Size(322, 25);
             this.label6.TabIndex = 33;
             this.label6.Text = "Person Group ID (Alphanumeric)";
-            // 
-            // cmbPersonGroups
-            // 
-            this.cmbPersonGroups.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left)));
-            this.cmbPersonGroups.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Suggest;
-            this.cmbPersonGroups.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
-            this.cmbPersonGroups.DataBindings.Add(new System.Windows.Forms.Binding("text", global::GetImageMetaData.Properties.Settings.Default, "personGroupID", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
-            this.cmbPersonGroups.FormattingEnabled = true;
-            this.cmbPersonGroups.Location = new System.Drawing.Point(20, 54);
-            this.cmbPersonGroups.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.cmbPersonGroups.Name = "cmbPersonGroups";
-            this.cmbPersonGroups.Size = new System.Drawing.Size(366, 33);
-            this.cmbPersonGroups.TabIndex = 36;
-            this.cmbPersonGroups.Text = global::GetImageMetaData.Properties.Settings.Default.personGroupID;
-            // 
-            // txtPersonGroupDisplay
-            // 
-            this.txtPersonGroupDisplay.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left)));
-            this.txtPersonGroupDisplay.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::GetImageMetaData.Properties.Settings.Default, "personGroupName", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
-            this.txtPersonGroupDisplay.Location = new System.Drawing.Point(22, 160);
-            this.txtPersonGroupDisplay.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.txtPersonGroupDisplay.Name = "txtPersonGroupDisplay";
-            this.txtPersonGroupDisplay.Size = new System.Drawing.Size(366, 31);
-            this.txtPersonGroupDisplay.TabIndex = 34;
-            this.txtPersonGroupDisplay.Text = global::GetImageMetaData.Properties.Settings.Default.personGroupName;
             // 
             // tabCameras
             // 
@@ -471,7 +393,7 @@ namespace GetImageMetaData
             this.tabCameras.Controls.Add(this.txtDVRUserName);
             this.tabCameras.Controls.Add(this.txtDVRIP);
             this.tabCameras.Location = new System.Drawing.Point(8, 39);
-            this.tabCameras.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabCameras.Margin = new System.Windows.Forms.Padding(4);
             this.tabCameras.Name = "tabCameras";
             this.tabCameras.Size = new System.Drawing.Size(964, 543);
             this.tabCameras.TabIndex = 2;
@@ -506,7 +428,7 @@ namespace GetImageMetaData
             "Amcrest",
             "Ring"});
             this.cmbSelCamera.Location = new System.Drawing.Point(266, 206);
-            this.cmbSelCamera.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.cmbSelCamera.Margin = new System.Windows.Forms.Padding(4);
             this.cmbSelCamera.Name = "cmbSelCamera";
             this.cmbSelCamera.Size = new System.Drawing.Size(460, 33);
             this.cmbSelCamera.TabIndex = 43;
@@ -520,7 +442,7 @@ namespace GetImageMetaData
             "Amcrest",
             "Ring"});
             this.cmbSelCameraNet.Location = new System.Drawing.Point(266, 25);
-            this.cmbSelCameraNet.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.cmbSelCameraNet.Margin = new System.Windows.Forms.Padding(4);
             this.cmbSelCameraNet.Name = "cmbSelCameraNet";
             this.cmbSelCameraNet.Size = new System.Drawing.Size(460, 33);
             this.cmbSelCameraNet.TabIndex = 42;
@@ -540,7 +462,7 @@ namespace GetImageMetaData
             // 
             this.txtIPCamSubChannel.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::GetImageMetaData.Properties.Settings.Default, "ipCameraSubChannel", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
             this.txtIPCamSubChannel.Location = new System.Drawing.Point(866, 287);
-            this.txtIPCamSubChannel.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.txtIPCamSubChannel.Margin = new System.Windows.Forms.Padding(4);
             this.txtIPCamSubChannel.Name = "txtIPCamSubChannel";
             this.txtIPCamSubChannel.Size = new System.Drawing.Size(78, 31);
             this.txtIPCamSubChannel.TabIndex = 40;
@@ -560,7 +482,7 @@ namespace GetImageMetaData
             // 
             this.txtIPCamChannels.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::GetImageMetaData.Properties.Settings.Default, "ipCameraChannels", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
             this.txtIPCamChannels.Location = new System.Drawing.Point(762, 287);
-            this.txtIPCamChannels.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.txtIPCamChannels.Margin = new System.Windows.Forms.Padding(4);
             this.txtIPCamChannels.Name = "txtIPCamChannels";
             this.txtIPCamChannels.Size = new System.Drawing.Size(70, 31);
             this.txtIPCamChannels.TabIndex = 38;
@@ -590,7 +512,7 @@ namespace GetImageMetaData
             // 
             this.txtDVRSubChannel.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::GetImageMetaData.Properties.Settings.Default, "dvrSubChannel", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
             this.txtDVRSubChannel.Location = new System.Drawing.Point(862, 123);
-            this.txtDVRSubChannel.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.txtDVRSubChannel.Margin = new System.Windows.Forms.Padding(4);
             this.txtDVRSubChannel.Name = "txtDVRSubChannel";
             this.txtDVRSubChannel.Size = new System.Drawing.Size(78, 31);
             this.txtDVRSubChannel.TabIndex = 34;
@@ -610,7 +532,7 @@ namespace GetImageMetaData
             // 
             this.txtAnalyzeTime.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::GetImageMetaData.Properties.Settings.Default, "timeDelay", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
             this.txtAnalyzeTime.Location = new System.Drawing.Point(444, 494);
-            this.txtAnalyzeTime.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.txtAnalyzeTime.Margin = new System.Windows.Forms.Padding(4);
             this.txtAnalyzeTime.MaxLength = 3;
             this.txtAnalyzeTime.Name = "txtAnalyzeTime";
             this.txtAnalyzeTime.Size = new System.Drawing.Size(60, 31);
@@ -627,37 +549,15 @@ namespace GetImageMetaData
             this.label13.TabIndex = 31;
             this.label13.Text = "IP Cam Password";
             // 
-            // txtIPcamPassword
-            // 
-            this.txtIPcamPassword.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::GetImageMetaData.Properties.Settings.Default, "ipCameraPassword", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
-            this.txtIPcamPassword.Location = new System.Drawing.Point(508, 287);
-            this.txtIPcamPassword.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.txtIPcamPassword.Name = "txtIPcamPassword";
-            this.txtIPcamPassword.PasswordChar = '*';
-            this.txtIPcamPassword.Size = new System.Drawing.Size(218, 31);
-            this.txtIPcamPassword.TabIndex = 30;
-            this.txtIPcamPassword.Text = global::GetImageMetaData.Properties.Settings.Default.ipCameraPassword;
-            // 
             // txtDVRChannels
             // 
             this.txtDVRChannels.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::GetImageMetaData.Properties.Settings.Default, "dvrChannels", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
             this.txtDVRChannels.Location = new System.Drawing.Point(762, 123);
-            this.txtDVRChannels.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.txtDVRChannels.Margin = new System.Windows.Forms.Padding(4);
             this.txtDVRChannels.Name = "txtDVRChannels";
             this.txtDVRChannels.Size = new System.Drawing.Size(70, 31);
             this.txtDVRChannels.TabIndex = 24;
             this.txtDVRChannels.Text = "0";
-            // 
-            // txtDVRPassword
-            // 
-            this.txtDVRPassword.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::GetImageMetaData.Properties.Settings.Default, "dvrPassword", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
-            this.txtDVRPassword.Location = new System.Drawing.Point(508, 123);
-            this.txtDVRPassword.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.txtDVRPassword.Name = "txtDVRPassword";
-            this.txtDVRPassword.PasswordChar = '*';
-            this.txtDVRPassword.Size = new System.Drawing.Size(218, 31);
-            this.txtDVRPassword.TabIndex = 22;
-            this.txtDVRPassword.Text = global::GetImageMetaData.Properties.Settings.Default.dvrPassword;
             // 
             // label12
             // 
@@ -719,22 +619,104 @@ namespace GetImageMetaData
             this.label5.TabIndex = 19;
             this.label5.Text = "DVR IP Address";
             // 
+            // chbContainerMode
+            // 
+            //this.chbContainerMode.DataBindings.Add(new System.Windows.Forms.Binding("Bool", global::GetImageMetaData.Properties.Settings.Default, "useContainerMode", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            this.chbContainerMode.AutoSize = true;
+            this.chbContainerMode.Location = new System.Drawing.Point(30, 403);
+            this.chbContainerMode.Name = "chbContainerMode";
+            this.chbContainerMode.Size = new System.Drawing.Size(264, 29);
+            this.chbContainerMode.TabIndex = 39;
+            this.chbContainerMode.Text = "Use in Container Mode";
+            this.chbContainerMode.UseVisualStyleBackColor = true;
+            this.chbContainerMode.CheckedChanged += new System.EventHandler(this.ChbContainerMode_CheckedChanged);
+            this.chbContainerMode.Checked = global::GetImageMetaData.Properties.Settings.Default.useContainerMode;
+            // 
+            // txtCognitiveServicesAPIKey
+            // 
+            this.txtCognitiveServicesAPIKey.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::GetImageMetaData.Properties.Settings.Default, "cognitiveServicesKey", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            this.txtCognitiveServicesAPIKey.Location = new System.Drawing.Point(32, 60);
+            this.txtCognitiveServicesAPIKey.Margin = new System.Windows.Forms.Padding(4);
+            this.txtCognitiveServicesAPIKey.Name = "txtCognitiveServicesAPIKey";
+            this.txtCognitiveServicesAPIKey.PasswordChar = '*';
+            this.txtCognitiveServicesAPIKey.Size = new System.Drawing.Size(728, 31);
+            this.txtCognitiveServicesAPIKey.TabIndex = 34;
+            this.txtCognitiveServicesAPIKey.Text = global::GetImageMetaData.Properties.Settings.Default.cognitiveServicesKey;
+            // 
+            // txtCognitiveServicesEndpoint
+            // 
+            this.txtCognitiveServicesEndpoint.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::GetImageMetaData.Properties.Settings.Default, "cognitiveServicesEndpoint", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            this.txtCognitiveServicesEndpoint.Location = new System.Drawing.Point(30, 146);
+            this.txtCognitiveServicesEndpoint.Margin = new System.Windows.Forms.Padding(4);
+            this.txtCognitiveServicesEndpoint.Name = "txtCognitiveServicesEndpoint";
+            this.txtCognitiveServicesEndpoint.Size = new System.Drawing.Size(728, 31);
+            this.txtCognitiveServicesEndpoint.TabIndex = 36;
+            this.txtCognitiveServicesEndpoint.Text = global::GetImageMetaData.Properties.Settings.Default.cognitiveServicesEndpoint;
+            // 
+            // cmbPersonGroups
+            // 
+            this.cmbPersonGroups.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
+            this.cmbPersonGroups.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Suggest;
+            this.cmbPersonGroups.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
+            this.cmbPersonGroups.DataBindings.Add(new System.Windows.Forms.Binding("text", global::GetImageMetaData.Properties.Settings.Default, "personGroupID", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            this.cmbPersonGroups.FormattingEnabled = true;
+            this.cmbPersonGroups.Location = new System.Drawing.Point(20, 54);
+            this.cmbPersonGroups.Margin = new System.Windows.Forms.Padding(4);
+            this.cmbPersonGroups.Name = "cmbPersonGroups";
+            this.cmbPersonGroups.Size = new System.Drawing.Size(366, 33);
+            this.cmbPersonGroups.TabIndex = 36;
+            this.cmbPersonGroups.Text = global::GetImageMetaData.Properties.Settings.Default.personGroupID;
+            // 
+            // txtPersonGroupDisplay
+            // 
+            this.txtPersonGroupDisplay.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
+            this.txtPersonGroupDisplay.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::GetImageMetaData.Properties.Settings.Default, "personGroupName", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            this.txtPersonGroupDisplay.Location = new System.Drawing.Point(22, 160);
+            this.txtPersonGroupDisplay.Margin = new System.Windows.Forms.Padding(4);
+            this.txtPersonGroupDisplay.Name = "txtPersonGroupDisplay";
+            this.txtPersonGroupDisplay.Size = new System.Drawing.Size(366, 31);
+            this.txtPersonGroupDisplay.TabIndex = 34;
+            this.txtPersonGroupDisplay.Text = global::GetImageMetaData.Properties.Settings.Default.personGroupName;
+            // 
+            // txtIPcamPassword
+            // 
+            this.txtIPcamPassword.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::GetImageMetaData.Properties.Settings.Default, "ipCameraPassword", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            this.txtIPcamPassword.Location = new System.Drawing.Point(508, 287);
+            this.txtIPcamPassword.Margin = new System.Windows.Forms.Padding(4);
+            this.txtIPcamPassword.Name = "txtIPcamPassword";
+            this.txtIPcamPassword.PasswordChar = '*';
+            this.txtIPcamPassword.Size = new System.Drawing.Size(218, 31);
+            this.txtIPcamPassword.TabIndex = 30;
+            this.txtIPcamPassword.Text = global::GetImageMetaData.Properties.Settings.Default.ipCameraPassword;
+            // 
+            // txtDVRPassword
+            // 
+            this.txtDVRPassword.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::GetImageMetaData.Properties.Settings.Default, "dvrPassword", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            this.txtDVRPassword.Location = new System.Drawing.Point(508, 123);
+            this.txtDVRPassword.Margin = new System.Windows.Forms.Padding(4);
+            this.txtDVRPassword.Name = "txtDVRPassword";
+            this.txtDVRPassword.PasswordChar = '*';
+            this.txtDVRPassword.Size = new System.Drawing.Size(218, 31);
+            this.txtDVRPassword.TabIndex = 22;
+            this.txtDVRPassword.Text = global::GetImageMetaData.Properties.Settings.Default.dvrPassword;
+            // 
             // txtOther
             // 
             this.txtOther.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::GetImageMetaData.Properties.Settings.Default, "otherVideoSource", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
             this.txtOther.Location = new System.Drawing.Point(24, 402);
-            this.txtOther.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.txtOther.Margin = new System.Windows.Forms.Padding(4);
             this.txtOther.Name = "txtOther";
             this.txtOther.Size = new System.Drawing.Size(926, 31);
             this.txtOther.TabIndex = 36;
             this.txtOther.Text = global::GetImageMetaData.Properties.Settings.Default.otherVideoSource;
-            //this.txtOther.Text = global::GetImageMetaData.Properties.Settings.Default.ipCameraIP;
             // 
             // txtIPCamUserName
             // 
             this.txtIPCamUserName.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::GetImageMetaData.Properties.Settings.Default, "ipCameraUserName", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
             this.txtIPCamUserName.Location = new System.Drawing.Point(266, 287);
-            this.txtIPCamUserName.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.txtIPCamUserName.Margin = new System.Windows.Forms.Padding(4);
             this.txtIPCamUserName.Name = "txtIPCamUserName";
             this.txtIPCamUserName.Size = new System.Drawing.Size(218, 31);
             this.txtIPCamUserName.TabIndex = 28;
@@ -744,7 +726,7 @@ namespace GetImageMetaData
             // 
             this.txtIPCamIp.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::GetImageMetaData.Properties.Settings.Default, "ipCameraIP", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
             this.txtIPCamIp.Location = new System.Drawing.Point(24, 287);
-            this.txtIPCamIp.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.txtIPCamIp.Margin = new System.Windows.Forms.Padding(4);
             this.txtIPCamIp.Name = "txtIPCamIp";
             this.txtIPCamIp.Size = new System.Drawing.Size(218, 31);
             this.txtIPCamIp.TabIndex = 26;
@@ -754,7 +736,7 @@ namespace GetImageMetaData
             // 
             this.txtDVRUserName.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::GetImageMetaData.Properties.Settings.Default, "dvrUserName", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
             this.txtDVRUserName.Location = new System.Drawing.Point(266, 123);
-            this.txtDVRUserName.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.txtDVRUserName.Margin = new System.Windows.Forms.Padding(4);
             this.txtDVRUserName.Name = "txtDVRUserName";
             this.txtDVRUserName.Size = new System.Drawing.Size(218, 31);
             this.txtDVRUserName.TabIndex = 20;
@@ -764,11 +746,43 @@ namespace GetImageMetaData
             // 
             this.txtDVRIP.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::GetImageMetaData.Properties.Settings.Default, "dvrIP", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
             this.txtDVRIP.Location = new System.Drawing.Point(24, 123);
-            this.txtDVRIP.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.txtDVRIP.Margin = new System.Windows.Forms.Padding(4);
             this.txtDVRIP.Name = "txtDVRIP";
             this.txtDVRIP.Size = new System.Drawing.Size(218, 31);
             this.txtDVRIP.TabIndex = 18;
             this.txtDVRIP.Text = global::GetImageMetaData.Properties.Settings.Default.dvrIP;
+            // 
+            // txtCosmosDataBasePrimConString
+            // 
+            this.txtCosmosDataBasePrimConString.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::GetImageMetaData.Properties.Settings.Default, "cosmosPrimaryConString", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            this.txtCosmosDataBasePrimConString.Location = new System.Drawing.Point(22, 237);
+            this.txtCosmosDataBasePrimConString.Margin = new System.Windows.Forms.Padding(4);
+            this.txtCosmosDataBasePrimConString.Name = "txtCosmosDataBasePrimConString";
+            this.txtCosmosDataBasePrimConString.PasswordChar = '*';
+            this.txtCosmosDataBasePrimConString.Size = new System.Drawing.Size(728, 31);
+            this.txtCosmosDataBasePrimConString.TabIndex = 29;
+            this.txtCosmosDataBasePrimConString.Text = global::GetImageMetaData.Properties.Settings.Default.cosmosPrimaryConString;
+            // 
+            // txtCosmosDataBasePrimKey
+            // 
+            this.txtCosmosDataBasePrimKey.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::GetImageMetaData.Properties.Settings.Default, "cosmosPrimaryKey", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            this.txtCosmosDataBasePrimKey.Location = new System.Drawing.Point(22, 144);
+            this.txtCosmosDataBasePrimKey.Margin = new System.Windows.Forms.Padding(4);
+            this.txtCosmosDataBasePrimKey.Name = "txtCosmosDataBasePrimKey";
+            this.txtCosmosDataBasePrimKey.PasswordChar = '*';
+            this.txtCosmosDataBasePrimKey.Size = new System.Drawing.Size(728, 31);
+            this.txtCosmosDataBasePrimKey.TabIndex = 27;
+            this.txtCosmosDataBasePrimKey.Text = global::GetImageMetaData.Properties.Settings.Default.cosmosPrimaryKey;
+            // 
+            // txtCosmosDataBaseURI
+            // 
+            this.txtCosmosDataBaseURI.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::GetImageMetaData.Properties.Settings.Default, "cosmosDataBaseURI", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            this.txtCosmosDataBaseURI.Location = new System.Drawing.Point(22, 56);
+            this.txtCosmosDataBaseURI.Margin = new System.Windows.Forms.Padding(4);
+            this.txtCosmosDataBaseURI.Name = "txtCosmosDataBaseURI";
+            this.txtCosmosDataBaseURI.Size = new System.Drawing.Size(728, 31);
+            this.txtCosmosDataBaseURI.TabIndex = 25;
+            this.txtCosmosDataBaseURI.Text = global::GetImageMetaData.Properties.Settings.Default.cosmosDataBaseURI;
             // 
             // FrmOptions
             // 
@@ -779,7 +793,7 @@ namespace GetImageMetaData
             this.Controls.Add(this.cmdCancel);
             this.Controls.Add(this.cmdSave);
             this.Controls.Add(this.tabControl1);
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "FrmOptions";
             this.Text = "Options";
             this.tabAzureCosmosDB.ResumeLayout(false);
@@ -852,5 +866,6 @@ namespace GetImageMetaData
         private System.Windows.Forms.Label label32;
         private System.Windows.Forms.TextBox txtCognitiveServicesAPIKey;
         private System.Windows.Forms.TextBox txtCognitiveServicesEndpoint;
+        private System.Windows.Forms.CheckBox chbContainerMode;
     }
 }

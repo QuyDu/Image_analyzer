@@ -8,7 +8,7 @@ using System.Windows.Forms;
 
 namespace GetImageMetaData
 {
-    // Update 02/02/2019 11:30 AM
+    // Update 03/09/2019 01:30 PM
     public partial class FrmOptions : Form
     {
         private static Options _options = new Options();
@@ -20,11 +20,12 @@ namespace GetImageMetaData
             InitializeComponent();
         }
 
-        private async void cmdSave_ClickAsync(object sender, EventArgs e)
+        private async void CmdSave_ClickAsync(object sender, EventArgs e)
         {
             if (GenLib.CheckForInternetConnection())
             {
                 Properties.Settings.Default.Save();
+
                 await UpdatePersonGroupsData();
 
                 Close();
@@ -65,7 +66,7 @@ namespace GetImageMetaData
 
         }
 
-        private async void cmdUpdate_ClickAsync(object sender, EventArgs e)
+        private async void CmdUpdate_ClickAsync(object sender, EventArgs e)
         {
             await UpdatePersonGroupsData();
         }
@@ -73,52 +74,46 @@ namespace GetImageMetaData
         private async Task UpdatePersonGroupsData()
         {
             await _options.UpdateMemberVarsFromProperties();
+            bool internet = _options.Internet;
+            bool containerMode = _options.ContainerMode;
+            string msgType1 = "PersonGroups";
+            string msgType2 = "Internet";
             await UpdatePersonGroupList();
             string groupId = string.Empty;
-
-            int groupsCount = cmbPersonGroups.Items.Count;
-            if (groupsCount > 1)
+            if (!containerMode)
             {
-                string selGroupId = !string.IsNullOrWhiteSpace(cmbPersonGroups.Items[1].ToString()) ? cmbPersonGroups.Items[1].ToString() : string.Empty;
-                groupId = !string.IsNullOrWhiteSpace(cmbPersonGroups.Text) ? cmbPersonGroups.Items.Contains(cmbPersonGroups.Text) ? cmbPersonGroups.Text : selGroupId : selGroupId;      
-            }
-            if (!string.IsNullOrWhiteSpace(groupId))
+                if (internet)
+                {
+                    int groupsCount = cmbPersonGroups.Items.Count;
+                    if (groupsCount > 1)
+                    {
+                        string selGroupId = !string.IsNullOrWhiteSpace(cmbPersonGroups.Items[1].ToString()) ? cmbPersonGroups.Items[1].ToString() : string.Empty;
+                        groupId = !string.IsNullOrWhiteSpace(cmbPersonGroups.Text) ? cmbPersonGroups.Items.Contains(cmbPersonGroups.Text) ? cmbPersonGroups.Text : selGroupId : selGroupId;
+                    }
+                    if (!string.IsNullOrWhiteSpace(groupId))
+                    {
+                        cmbPersonGroups.Text = groupId;
+
+                        string groupDisplayName = await GetGroupDisplayName(groupId);
+
+                        Color color = await GetColorFromUserData(groupId);
+                        txtPersonGroupDisplay.Text = groupDisplayName;
+                        cmdSetColor.BackColor = color;
+                    }
+                    else
+                    {
+                        cmbPersonGroups.Text = string.Empty;
+                        txtPersonGroupDisplay.Text = string.Empty;
+                        MessageBox.Show(GenLib.SetMessage(msgType1, string.Empty, string.Empty, null));
+                    }       
+                } 
+                else // if internet is false
+                {
+                     MessageBox.Show(GenLib.SetMessage(msgType2, string.Empty, string.Empty, null));
+                }
+            } 
+            else // If Container mode true
             {
-                cmbPersonGroups.Text = groupId;
-
-                string groupDisplayName = await GetGroupDisplayName(groupId);
-
-                Color color = await GetColorFromUserData(groupId);
-                txtPersonGroupDisplay.Text = groupDisplayName;
-                cmdSetColor.BackColor = color;
-
-                // knh 2-4-19 - removed dependency on frmMain from options here
-                //await _frmMain.UpdatePersonListAsync(groupId);
-            }
-            else
-            {
-                cmbPersonGroups.Text = string.Empty;
-                txtPersonGroupDisplay.Text = string.Empty;
-                
-                MessageBox.Show($@"You are recieving this message because of 1 of the following reasons:
-
-                        1. You have Entereded an invalid Cognitive Services API Key.
-                            (This App uses the Cognitive Services 1 Key)
-
-                        2. You have entered an invalid Cognitive Services Endpoint. 
-                            (Cognitive Services 1 Key Endpoint should look something like depending on region selected,
-                            https://westus.api.cognitive.microsoft.com/
-
-                        3. There are currently no personGroups registed for this API Key.
-                            To create a new personGroup:
-                            a. Analyze Image with a face
-                            b. Click on face
-                            c. Click on Add Face
-                            d. Add a name of the desired persongroup
-                               (personGroup name must be lowercase and no spaces)
-                            e. Add a name for the person being added
-                               (when creating a new personGroup you must add a new person for personGroup to be trained)
-                            f. Click on Save.");
 
             }
             
@@ -148,7 +143,7 @@ namespace GetImageMetaData
             return color;
         }
 
-        private async void cmdDeleteGroup_ClickAsync(object sender, EventArgs e)
+        private async void CmdDeleteGroup_ClickAsync(object sender, EventArgs e)
         {
             if (!string.IsNullOrWhiteSpace(cmbPersonGroups.Text))
             {
@@ -159,7 +154,7 @@ namespace GetImageMetaData
         }
 
 
-        private void cmdSetColor_Click(object sender, EventArgs e)
+        private void CmdSetColor_Click(object sender, EventArgs e)
         {
             ColorDialog dlg = new ColorDialog
             {
@@ -174,10 +169,20 @@ namespace GetImageMetaData
                 cmdSetColor.BackColor = dlg.Color;
             }
         }
-        private async void cmdUpdateGroup_ClickAsync(object sender, EventArgs e)
+        private async void CmdUpdateGroup_ClickAsync(object sender, EventArgs e)
         {
             await _options.UpdateMemberVarsFromProperties();
-            
+            bool Internet = _options.Internet;
+            bool containerMode = _options.ContainerMode;
+            bool PersonGroupExist = _options.personGroupFound;
+            string CSKey = _options.CSKey;
+            string CSEndpoint = _options.CSEndpoint;
+            string PersonGroupId = _options.PersonGroupId;
+            string msgType1 = "First";
+            string msgType2 = "PersonGroups";
+            string msgType3 = "PersonGroups";
+            string msgType4 = "Internet";
+
             if (!string.IsNullOrWhiteSpace(_options.CSKey) && !string.IsNullOrWhiteSpace(_options.FaceEndpoint))
             {
                 string userData = cmdSetColor.BackColor.ToArgb().ToString();
@@ -192,9 +197,16 @@ namespace GetImageMetaData
             }
         }
 
-        private void txtOther_TextChanged(object sender, EventArgs e)
+        private void ChbContainerMode_CheckedChanged(object sender, EventArgs e)
         {
-
+            if(chbContainerMode.Checked)
+            {
+                Properties.Settings.Default.useContainerMode = true;
+            }
+            else
+            {
+                Properties.Settings.Default.useContainerMode = false;
+            }
         }
     }
 }

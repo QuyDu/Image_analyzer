@@ -346,5 +346,17 @@ namespace GetImageMetaData.Properties {
                 this["cognitiveServicesEndpoint"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool useContainerMode {
+            get {
+                return ((bool)(this["useContainerMode"]));
+            }
+            set {
+                this["useContainerMode"] = value;
+            }
+        }
     }
 }

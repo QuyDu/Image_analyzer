@@ -14,13 +14,12 @@ using System.Globalization;
 
 namespace GetImageMetaData
 {
-    // Update 02/10/2019 07:45 AM
+    // Update 03/09/2019 01:30 PM
     class GenLib
     {
         private static Options _options = new Options();
         private static FrmOptions _frmOptions = new FrmOptions();
-        private const long _maxImageSize = (1024 * 1024) * 4;
-
+        private const long _maxImageSize = (1024 * 1024) * 4;  
         public static bool CheckForInternetConnection()
         {
             
@@ -200,6 +199,80 @@ namespace GetImageMetaData
             return imgStream;
         }
 
+        public static string SetMessage(string msgType, string personGroupId, string personGroup, Exception ex)
+        {
+            string msg = string.Empty;
+
+            if (!string.IsNullOrWhiteSpace(msgType))
+            {
+                switch (msgType.ToLower())
+                {
+                    case "internet":
+                        msg = @"It appears there is no Interent Connection, Please verify your Internet Connection and all Application Settings.";
+                        break;
+
+                    case "first":
+                        msg = @"Since this appears to be the first time this program has been run, please continue by defining the required options in the following dialog.";
+                        break;
+
+                    case "persongroups":
+                        msg = $@"You are recieving this message because of 1 of the following reasons:
+
+                        1. You have Entereded an invalid Cognitive Services API Key.
+                            (This App uses the Cognitive Services 1 Key)
+
+                        2. You have entered an invalid Cognitive Services Endpoint. 
+                            (Cognitive Services 1 Key Endpoint should look something like depending on region selected,
+                            https://westus.api.cognitive.microsoft.com/
+
+                        3. There are currently no personGroups registed for this API Key.
+                            To create a new personGroup:
+                            a. Analyze Image with a face
+                            b. Click on face
+                            c. Click on Add Face
+                            d. Add a name of the desired persongroup
+                                (personGroup name must be lowercase and no spaces)
+                            e. Add a name for the person being added
+                                (when creating a new personGroup you must add a new person for personGroup to be trained)
+                            f. Click on Save.";
+                        break;
+
+                    case "updatepersonlist":
+                        msg = $@"There are Currently no Face Profiles registered for the person group {personGroupId}, you can create Person Profiles by:
+
+                        1. Browse for an image,
+                        This is done by clicking on Choose File.
+
+                        2. Analyze the image, 
+                        This is done by clicking on Analyze.
+
+                        3. Right click on the face with a Box around it,
+                         that you wish to create the profile for.
+
+                        4. Click on Add Face. 
+
+                        5. Type in the name of the person and click on Save Name";
+                        break;
+
+                    case "personfound":
+                        msg = $@" No Person was Identified to be Deleted";
+                        break;
+
+                    case "createpersongroup:":
+                        msg = $@"Error creating person group '{personGroup}': {ex.Message}";
+                        break;
+
+                    case "exception":
+                        msg = $@"Unhandled exception in updatePersonList: {ex.Message}";
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+            return msg;
+        }
+
         public static string GetValueAsString(string value)
         {
             if (!string.IsNullOrWhiteSpace(value))
@@ -218,52 +291,39 @@ namespace GetImageMetaData
             return defaultValue;
         }
 
-        public static async Task<PersonGroup[]> GetPersonGroups()
+        public static async Task<PersonGroup[]> GetPersonGroups(string CSKey, FaceServiceClient FaceClient)
         {
             PersonGroup[] personGroups = null;
-            if (!string.IsNullOrWhiteSpace(_options.CSKey))
+            if (!string.IsNullOrWhiteSpace(CSKey))
             {
-                personGroups = await _options._faceServiceClient.ListPersonGroupsAsync(_options.CSKey);
+                personGroups = await FaceClient.ListPersonGroupsAsync(CSKey);
             }
 
             return personGroups;
         }
 
-        public static async Task UpdatePersonGroupList()
+        public static async Task UpdatePersonGroupList(string CSKey, string FaceEndpoint, FaceServiceClient FaceClient)
         {
-            await _options.UpdateMemberVarsFromProperties();
             PersonGroup[] personGroups = Array.Empty<PersonGroup>();
+            personGroups = await FaceClient.ListPersonGroupsAsync(CSKey);
 
-            //Task: Clean up this dont make sense
-            if (string.IsNullOrWhiteSpace(_options.CSKey))
-            {
-                if (!string.IsNullOrWhiteSpace(_options.CSKey) && !string.IsNullOrWhiteSpace(_options.FaceEndpoint))
-                {
-                    string faceKey = _options.CSKey;
-                    string faceEnd = _options.FaceEndpoint;
-                    FaceServiceClient faceClient = _options._faceServiceClient;
-                    personGroups = await faceClient.ListPersonGroupsAsync(faceKey);
-                }
-            }
-            else
-            {
-                personGroups = await _options._faceServiceClient.ListPersonGroupsAsync(_options.CSKey);
-            }
             _frmOptions.cmbPersonGroups.SelectedText = string.Empty;
             _frmOptions.cmbPersonGroups.Items.Clear();
             _frmOptions.cmbPersonGroups.Items.Add(string.Empty);
-            for (var i = 0; i < personGroups.Length; i++)
+            for (int i = 0; i < personGroups.Length; i++)
             {
                 PersonGroup personGroup = personGroups[i];
                 _frmOptions.cmbPersonGroups.Items.Add(personGroup.PersonGroupId);
             }
             _frmOptions.cmbPersonGroups.Refresh();
         }
-        public static async Task<string> AddFace(string faceImageFn, string personName, string groupId, string groupDisplayName)
+
+        public static async Task<string> AddFace(string faceImageFn, string personName, string groupId, string groupDisplayName, FaceServiceClient FaceClient)
         {
-            return await AddFace(new MemoryStream(File.ReadAllBytes(faceImageFn)), personName, groupId, groupDisplayName);
+            return await AddFace(new MemoryStream(File.ReadAllBytes(faceImageFn)), personName, groupId, groupDisplayName, FaceClient);
         }
-        public static async Task<string> AddFace(MemoryStream faceStream, string personName, string groupId, string groupDisplayName, bool showMsgBox = true)
+
+        public static async Task<string> AddFace(MemoryStream faceStream, string personName, string groupId, string groupDisplayName, FaceServiceClient FaceClient, bool showMsgBox = true)
         {
             string statusStr;
 
@@ -272,18 +332,18 @@ namespace GetImageMetaData
                 // Does PersonGroup already exist
                 try
                 {
-                     await _options._faceServiceClient.GetPersonGroupAsync(groupId);
+                     await FaceClient.GetPersonGroupAsync(groupId);
                 }
                 catch (Exception)
                 {
                     // person group does not exist - create it
-                    await _options._faceServiceClient.CreatePersonGroupAsync(groupId, groupDisplayName);
+                    await FaceClient.CreatePersonGroupAsync(groupId, groupDisplayName);
 
                     // FIX there needs to be a wait or something to detect the new personGroup
-                    await _options._faceServiceClient.GetPersonGroupAsync(groupId);
+                    await FaceClient.GetPersonGroupAsync(groupId);
                 }
                 //Get list of faces if any
-                Person[] people = await _options._faceServiceClient.ListPersonsAsync(groupId);
+                Person[] people = await FaceClient.ListPersonsAsync(groupId);
                 Person p = people.FirstOrDefault(myP => myP.Name.Equals(personName, StringComparison.OrdinalIgnoreCase));
                 Guid personId;
                 if (p != null)
@@ -294,23 +354,23 @@ namespace GetImageMetaData
                 else
                 {
                     // personGroupId is the group to add the person to, personName is what the user typed in to identify this face
-                    CreatePersonResult myPerson = await _options._faceServiceClient.CreatePersonAsync(groupId, personName);
+                    CreatePersonResult myPerson = await FaceClient.CreatePersonAsync(groupId, personName);
                     personId = myPerson.PersonId;
                 }
                 // Person - List Persons in a Person Group
                 // Detect faces in the image and add
-                await _options._faceServiceClient.AddPersonFaceAsync(groupId, personId, faceStream);
+                await FaceClient.AddPersonFaceAsync(groupId, personId, faceStream);
 
                 // whenever we add a face, docs says we need to retrain - do it!
 
                 //await retrainPersonGroup(_options.PersonGroupId);
 
                 //// I think this is needed
-                await _options._faceServiceClient.TrainPersonGroupAsync(groupId);
+                await FaceClient.TrainPersonGroupAsync(groupId);
 
                 while (true)
                 {
-                    TrainingStatus trainingStatus = await _options._faceServiceClient.GetPersonGroupTrainingStatusAsync(groupId);
+                    TrainingStatus trainingStatus = await FaceClient.GetPersonGroupTrainingStatusAsync(groupId);
 
                     if (trainingStatus.Status != Status.Running) break;
 
@@ -338,13 +398,13 @@ namespace GetImageMetaData
             return (byte[])converter.ConvertTo(img, typeof(byte[]));
         }
 
-        public static async Task<EnhancedFace[]> DetectFaces(string imageFilePath)
+        public static async Task<EnhancedFace[]> DetectFaces(string imageFilePath, FaceServiceClient FaceClient)
         {
             MemoryStream imageStream = new MemoryStream(File.ReadAllBytes(imageFilePath));
-            return await GenLib.DetectFaces(imageStream);
+            return await GenLib.DetectFaces(imageStream, FaceClient);
         }
 
-        public static async Task<EnhancedFace[]> DetectFaces(Image img)
+        public static async Task<EnhancedFace[]> DetectFaces(Image img, FaceServiceClient FaceClient)
         {
             string errStr = string.Empty;
             MemoryStream imageStream = new MemoryStream();
@@ -352,7 +412,7 @@ namespace GetImageMetaData
             imageStream.Seek(0, SeekOrigin.Begin);
             if (imageStream.Length < (_maxImageSize - 1))
             {
-                return await DetectFaces(imageStream);
+                return await DetectFaces(imageStream, FaceClient);
             }
             else
             {
@@ -361,15 +421,17 @@ namespace GetImageMetaData
                 fixedStream.CopyTo(imageStream2);
                 imageStream2.Seek(0, SeekOrigin.Begin);
 
-                return await DetectFaces(imageStream2);
+                return await DetectFaces(imageStream2, FaceClient);
             }
         }
 
-        public static async Task<EnhancedFace[]> DetectFaces(MemoryStream imageStream)
+        public static async Task<EnhancedFace[]> DetectFaces(MemoryStream imageStream, FaceServiceClient FaceClient)
         {
             bool getFaceLandmarks = false;
+
+
             // Submit image to API. 
-            List<FaceAttributeType> faceAttr = new List<FaceAttributeType>
+            List <FaceAttributeType> faceAttr = new List<FaceAttributeType>
             {
                 FaceAttributeType.Accessories,
                 FaceAttributeType.Age,
@@ -387,7 +449,7 @@ namespace GetImageMetaData
                 FaceAttributeType.Smile
             };
 
-            Face[] faces = await _options._faceServiceClient.DetectAsync(imageStream, true, getFaceLandmarks, returnFaceAttributes: faceAttr);
+            Face[] faces = await FaceClient.DetectAsync(imageStream, true, getFaceLandmarks, returnFaceAttributes: faceAttr);
 
             // if getFaceLandMarks is true , you can get data like faces[0].FaceLandmarks.NoseRootLeft
             // TASK Currently errors when
@@ -400,9 +462,8 @@ namespace GetImageMetaData
             return eFaces;
         }
 
-
         // return faces[] as list of chunks of 'chunkSize'
-        private static List<Guid[]> getFaceIDsInChunks(EnhancedFace[] faces, int chunkSize)
+        private static List<Guid[]> GetFaceIDsInChunks(EnhancedFace[] faces, int chunkSize)
         {
             List<Guid[]> faceList = new List<Guid[]>();
             for (int i = 0; i < faces.Length; i = i + chunkSize)
@@ -415,15 +476,14 @@ namespace GetImageMetaData
             return faceList;
         }
 
-
-        public static async Task<List<IdentifiedPerson>> GetCandidateNames(EnhancedFace[] faces, bool includeConfidence = true)
+        public static async Task<List<IdentifiedPerson>> GetCandidateNames(EnhancedFace[] faces, PersonGroup[] personGroups, FaceServiceClient FaceClient, bool includeConfidence = true)
         {
-            List<Guid[]> faceIDs = getFaceIDsInChunks(faces, 10);
+            List<Guid[]> faceIDs = GetFaceIDsInChunks(faces, 10);
             // see https://westus.dev.cognitive.microsoft.com/docs/services/563879b61984550e40cbbe8d/operations/563879b61984550f30395239/console
 
             //Guid[] faceIds = faces.Select(face => face.FaceId).ToArray();
-            PersonGroup[] personGroups = Array.Empty<PersonGroup>();
-            personGroups = await GenLib.GetPersonGroups();
+            //PersonGroup[] personGroups = Array.Empty<PersonGroup>();
+            //personGroups = await GenLib.GetPersonGroups();
             List<string> namesFound = new List<string>();
             IdentifyResult[] results;
             List<IdentifiedPerson> groupInfo = new List<IdentifiedPerson>();
@@ -435,7 +495,7 @@ namespace GetImageMetaData
                 {
                     foreach (Guid[] faceArray in faceIDs)
                     {
-                        results = await _options._faceServiceClient.IdentifyAsync(personGroup.PersonGroupId, faceArray);
+                        results = await FaceClient.IdentifyAsync(personGroup.PersonGroupId, faceArray);
                         foreach (IdentifyResult identifyResult in results)
                         {
                             //string name;
@@ -446,7 +506,7 @@ namespace GetImageMetaData
 
                                 // Get top 1 among all candidates returned...Gets the best match for each face ID in the white list and adds it to the List
                                 Guid candidateId = identifyResult.Candidates[0].PersonId;
-                                person = await _options._faceServiceClient.GetPersonAsync(personGroup.PersonGroupId, candidateId);
+                                person = await FaceClient.GetPersonAsync(personGroup.PersonGroupId, candidateId);
 
                                 string personName = person?.Name ?? "Unknown";
                                 string name = includeConfidence ? $"{personName} ({identifyResult.Candidates[0].Confidence.ToString(CultureInfo.InvariantCulture)})" : personName;
@@ -488,7 +548,6 @@ namespace GetImageMetaData
 
             return groupInfo;
         }
-
 
     } // class
 } // namespace

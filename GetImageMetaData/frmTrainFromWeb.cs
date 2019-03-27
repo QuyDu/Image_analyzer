@@ -7,9 +7,11 @@ using System.Windows.Forms;
 using System.Net;
 using System.IO;
 using Newtonsoft.Json;
+using Microsoft.ProjectOxford.Face;
 
 namespace GetImageMetaData
 {
+    // Update 03/15/2019 11:45 AM
     public partial class FrmTrainFromWeb : Form
     {
         const string FBI_TOP10_GROUP_ID = "fbitopten";
@@ -92,10 +94,12 @@ namespace GetImageMetaData
 
         private async Task<bool> TrainWithImages(List<ImageInfo> imageList, string groupId, string groupDisplayName)
         {
+            //await _options.UpdateMemberVarsFromProperties();
+            FaceServiceClient faceClient = _options._faceServiceClient;
             foreach (ImageInfo imageInfo in imageList)
             {
                 MemoryStream stream = new MemoryStream(imageInfo.ImageBytes);
-                string statusStr = await GenLib.AddFace(stream, imageInfo.Name, groupId, groupDisplayName, false);
+                string statusStr = await GenLib.AddFace(stream, imageInfo.Name, groupId, groupDisplayName, faceClient ,false);
                 addStatus(statusStr);
             }
 
@@ -104,41 +108,61 @@ namespace GetImageMetaData
 
         private async void cmdTrain_ClickAsync(object sender, EventArgs e)
         {
+            await _options.UpdateMemberVarsFromProperties();
+
+            bool internet = _options.Internet;
+            bool containerMode = _options.ContainerMode;
+            string msgType4 = "Internet";
+
             // https://www.fbi.gov/wanted/topten/lamont-stephenson/@@images/image.jpg
             // https://api.fbi.gov/@wanted
             // https://api.fbi.gov/@wanted?pageSize=20&page=1&sort_on=modified&sort_order=desc
 
             if (!string.IsNullOrWhiteSpace(cmbWebSite.Text))
             {
-                string webSiteGroupId = string.Empty;
-                string websiteGroupDisplayName = string.Empty;
-                List<ImageInfo> imagesToTrain = new List<ImageInfo>();
-
-                switch (cmbWebSite.Text)
+                if (internet)
                 {
-                    case "FBI Top Ten Most Wanted":
-                        webSiteGroupId = FBI_TOP10_GROUP_ID;
-                        websiteGroupDisplayName = FBI_TOP10_GROUP_DISPLAY_NAME;
-                        imagesToTrain = ScrapeImagesFromFbi("topten");
-                        break;
+                    string webSiteGroupId = string.Empty;
+                    string websiteGroupDisplayName = string.Empty;
+                    List<ImageInfo> imagesToTrain = new List<ImageInfo>();
 
-                    case "FBI Fugitives":
-                        webSiteGroupId = FBI_FUGITIVE_GROUP_ID;
-                        websiteGroupDisplayName = FBI_FUGITIVE_GROUP_DISPLAY_NAME;
-                        imagesToTrain = ScrapeImagesFromFbi("fugitive");
-                        break;
+                    switch (cmbWebSite.Text)
+                    {
+                        case "FBI Top Ten Most Wanted":
+                            webSiteGroupId = FBI_TOP10_GROUP_ID;
+                            websiteGroupDisplayName = FBI_TOP10_GROUP_DISPLAY_NAME;
+                            imagesToTrain = ScrapeImagesFromFbi("topten");
+                            break;
 
-                    case "FBI Most Wanted Terrorist":
-                        webSiteGroupId = FBI_TERRORIST_GROUP_ID;
-                        websiteGroupDisplayName = FBI_TERRORIST_GROUP_DISPLAY_NAME;
-                        imagesToTrain = ScrapeImagesFromFbi("terrorist");
-                        break;
+                        case "FBI Fugitives":
+                            webSiteGroupId = FBI_FUGITIVE_GROUP_ID;
+                            websiteGroupDisplayName = FBI_FUGITIVE_GROUP_DISPLAY_NAME;
+                            imagesToTrain = ScrapeImagesFromFbi("fugitive");
+                            break;
+
+                        case "FBI Most Wanted Terrorist":
+                            webSiteGroupId = FBI_TERRORIST_GROUP_ID;
+                            websiteGroupDisplayName = FBI_TERRORIST_GROUP_DISPLAY_NAME;
+                            imagesToTrain = ScrapeImagesFromFbi("terrorist");
+                            break;
+                    }
+
+                    if (MessageBox.Show($@"Are you sure you want to capture the images from '{cmbWebSite.Text}'?", @"Confirmation", MessageBoxButtons.OKCancel) == DialogResult.OK)
+                    {
+                        await TrainWithImages(imagesToTrain, webSiteGroupId, websiteGroupDisplayName);
+                    }
                 }
-
-                if (MessageBox.Show($@"Are you sure you want to capture the images from '{cmbWebSite.Text}'?", @"Confirmation", MessageBoxButtons.OKCancel) == DialogResult.OK)
+                else
                 {
-                    await TrainWithImages(imagesToTrain, webSiteGroupId, websiteGroupDisplayName);
-                }  
+                    if (containerMode)
+                    {
+
+                    }
+                    else
+                    {
+                        MessageBox.Show(GenLib.SetMessage(msgType4, string.Empty, string.Empty, null));
+                    }
+                }
             }
         }
 

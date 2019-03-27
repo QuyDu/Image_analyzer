@@ -12,7 +12,7 @@ using System.Windows.Forms;
 
 namespace GetImageMetaData
 {
-    // Update 02/08/2019 12:30 AM
+    // Update 03/09/2019 01:30 PM
     public partial class frmAddFace : Form
     {
         private FaceServiceClient _faceClient;
@@ -75,8 +75,10 @@ namespace GetImageMetaData
         private async void frmAddFace_Load(object sender, EventArgs e)
         {
             await _options.UpdateMemberVarsFromProperties();
+            string CSKey = _options.CSKey;
+            FaceServiceClient faceClient = _options._faceServiceClient;
             // call our general library to get our list of groups and populate our combobox
-            PersonGroup[] groups = await GenLib.GetPersonGroups();
+            PersonGroup[] groups = await GenLib.GetPersonGroups(CSKey, faceClient);
 
             cmbPersonGroup.Items.Add(string.Empty);
             for (int i = 0; i < groups.Length; i++)

@@ -2,16 +2,18 @@
 using Microsoft.ProjectOxford.Face.Contract;
 using Microsoft.ProjectOxford.Vision;
 using System.Threading.Tasks;
+using MessageBox = System.Windows.Forms.MessageBox;
 
 namespace GetImageMetaData
 {
-    // Update 02/02/2019 11:30 AM
+    // Update 03/09/2019 01:30 PM
     class Options
     {
         public string CSKey;
         public string CSEndpoint;
         public string VisionEndpoint;
         public string FaceEndpoint;
+        public string ContainerEndpoint;
         public string TextAnalyticsKey;
         public string TextAnalyticsEndpoint;
         public string TextTransKey;
@@ -35,6 +37,8 @@ namespace GetImageMetaData
         public int TimeDelay;
         public string _personGroupDisplayName;
         public bool personGroupFound;
+        public bool ContainerMode;
+        public bool Internet;
 
         public FrameGrabber<LiveCameraResult> _grabber = new FrameGrabber<LiveCameraResult>();
         //Clients
@@ -44,12 +48,15 @@ namespace GetImageMetaData
 
         public async Task UpdateMemberVarsFromProperties()
         {   // Cognitive Services API's
+            Internet = GenLib.CheckForInternetConnection();
+            ContainerMode = Properties.Settings.Default.useContainerMode;
             CSKey = Properties.Settings.Default.cognitiveServicesKey.Trim();
             CSEndpoint = Properties.Settings.Default.cognitiveServicesEndpoint.Trim();
             FaceEndpoint = $"{CSEndpoint}face/v1.0";
             //FaceEndpoint = "https://westus.api.cognitive.microsoft.com/face/v1.0";
             VisionEndpoint = $"{CSEndpoint}vision/v1.0";
             //VisionEndpoint = "https://westus.api.cognitive.microsoft.com/vision/v1.0";
+            ContainerEndpoint = "https://localhost:5000";
             TextAnalyticsKey = Properties.Settings.Default.textKey;
             TextAnalyticsEndpoint = Properties.Settings.Default.textEndpoint;
             TextTransKey = Properties.Settings.Default.translatorKey;
@@ -62,31 +69,41 @@ namespace GetImageMetaData
                 personGroupFound = false;
                 _faceServiceClient = new FaceServiceClient(CSKey, FaceEndpoint);
                 _visionServiceClient = new VisionServiceClient(CSKey, VisionEndpoint);
-                try
+                if (!ContainerMode)
                 {
-                    PersonGroup personGroupInfo = await _faceServiceClient.GetPersonGroupAsync(groupID);
-                    PersonGroupId = Properties.Settings.Default.personGroupID;
-                    PersonGroupName = Properties.Settings.Default.personGroupName;
-                    personGroupFound = true;
-                }
-                catch
-                {
-                    try
+                    if (Internet)
                     {
-                        PersonGroup[] personGroups = await _faceServiceClient.ListPersonGroupsAsync(CSKey);
-                        PersonGroupId = personGroups[0].PersonGroupId;
-                        PersonGroup personGroupInfo = await _faceServiceClient.GetPersonGroupAsync(PersonGroupId);
-                        PersonGroupName = personGroupInfo.Name;
-                        Properties.Settings.Default.personGroupID = PersonGroupId;
-                        Properties.Settings.Default.personGroupName = PersonGroupName;
-                        personGroupFound = true;
-                    }
-                    catch
-                    {
+                        try
+                        {
+                            PersonGroup personGroupInfo = await _faceServiceClient.GetPersonGroupAsync(groupID);
+                            PersonGroupId = Properties.Settings.Default.personGroupID;
+                            PersonGroupName = Properties.Settings.Default.personGroupName;
+                            personGroupFound = true;
+                        }
+                        catch
+                        {
+                            try
+                            {
+                                PersonGroup[] personGroups = await _faceServiceClient.ListPersonGroupsAsync(CSKey);
+                                PersonGroupId = personGroups[0].PersonGroupId;
+                                PersonGroup personGroupInfo = await _faceServiceClient.GetPersonGroupAsync(PersonGroupId);
+                                PersonGroupName = personGroupInfo.Name;
+                                Properties.Settings.Default.personGroupID = PersonGroupId;
+                                Properties.Settings.Default.personGroupName = PersonGroupName;
+                                personGroupFound = true;
+                            }
+                            catch
+                            {
 
+                            }
+                        }
+                        _personGroupDisplayName = !string.IsNullOrWhiteSpace(PersonGroupName) ? PersonGroupName : PersonGroupId;
+                    }
+                    else
+                    {
+                        MessageBox.Show(GenLib.SetMessage("Internet", string.Empty, string.Empty, null));
                     }
                 }
-                _personGroupDisplayName = !string.IsNullOrWhiteSpace(PersonGroupName) ? PersonGroupName : PersonGroupId;
             }
             // Camera Information
             Camoip = Properties.Settings.Default.ipCameraIP;

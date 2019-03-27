@@ -1,4 +1,5 @@
 ﻿using Microsoft.ProjectOxford.Face;
+using Microsoft.ProjectOxford.Face.Contract;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -9,7 +10,7 @@ using System.Windows.Forms;
 
 namespace GetImageMetaData
 {
-    // Update 02/02/2019 11:30 AM
+    // Update 03/15/2019 01:00 PM
     public partial class frmCategorizeFiles : Form
     {
         private long _maxImageSize;
@@ -31,73 +32,88 @@ namespace GetImageMetaData
 
         private async Task CategorizeFiles(string nameToFind)
         {
+            await _options.UpdateMemberVarsFromProperties();
+            bool internet = _options.Internet;
+            bool containerMode = _options.ContainerMode;
+            string msgType4 = "Internet";
+
             string rootFolder = GenLib.BrowseForFolder();
             int numCategorized = 0;
             int fileNum = 0;
             string errStr;
+            string CSKey = _options.CSKey;
             FaceServiceClient faceClient = _options._faceServiceClient;
+            PersonGroup[] personGroups = Array.Empty<PersonGroup>();
+            personGroups = await GenLib.GetPersonGroups(CSKey, faceClient);
+
             if (!string.IsNullOrEmpty(rootFolder))
             {
-                // user selected a folder to scan - start scan
-                string[] files = Directory.GetFiles(rootFolder);
-
-                // Add image scale down here
-                SetProgressMax(files.Length);
-                foreach (string fn in files)
+                if (internet)
                 {
-                    fileNum++;
-                    //Image workImage = fn.Clone();
+                    // user selected a folder to scan - start scan
+                    string[] files = Directory.GetFiles(rootFolder);
 
-                    if (GenLib.FileIsImage(fn))
+                    SetProgressMax(files.Length);
+                    foreach (string fn in files)
                     {
-                        // Image needs to be smaller than 4MB
-                        // FIX Currently this following method does not convert img to les than 4MB
-                        Image readyImage;
-                        System.Drawing.Image selImage;
+                        fileNum++;
+                        //Image workImage = fn.Clone();
 
-                        selImage = (Bitmap)Image.FromFile(fn);
-
-                        // i belive this is where the max size work maxsize is being set
-
-                        try
+                        if (GenLib.FileIsImage(fn))
                         {
-                            Stream imageFileStream = GenLib.ConvertAndCompressImageFileToStream(selImage, _maxImageSize, out errStr);
+                            // Image needs to be smaller than 4MB
+                            // FIX Currently this following method does not convert img to les than 4MB
+                            Image readyImage;
+                            System.Drawing.Image selImage;
 
-                            //readyImage = selImage;
-                            readyImage = Image.FromStream(imageFileStream);
+                            selImage = (Bitmap)Image.FromFile(fn);
 
-                            UpdateStatus($"Detecting faces in file '{fn}'...");
-                            EnhancedFace[] detectedFaces = await GenLib.DetectFaces(readyImage);
-
-                            //var detectedFaces = await DetectFaces(picView.Image);
-                            //var detectedFaces = await DetectFaces(imageFileStream);
-
-                            // Does detectedFaces array contain at least one entry
-                            if (detectedFaces.Any())
+                            try
                             {
-                                List<IdentifiedPerson> foundGroupInfo = await GenLib.GetCandidateNames(detectedFaces, false);
-                                List<string> foundNames = foundGroupInfo.Select(g => g.PersonName).ToList<string>();
+                                Stream imageFileStream = GenLib.ConvertAndCompressImageFileToStream(selImage, _maxImageSize, out errStr);
 
-                                if (nameToFind == "" || foundNames.Contains(nameToFind, StringComparer.OrdinalIgnoreCase))
+                                //readyImage = selImage;
+                                readyImage = Image.FromStream(imageFileStream);
+
+                                UpdateStatus($"Detecting faces in file '{fn}'...");
+                                EnhancedFace[] detectedFaces = await GenLib.DetectFaces(readyImage, faceClient);
+
+                                if (detectedFaces.Any())
                                 {
-                                    // we found an image with our desired face in it - copy it out to our target dir
-                                    CopyImageToCategoryDir(fn, nameToFind, foundNames);
-                                    numCategorized++;
-                                }
-                                else
-                                    LogInfo($"{detectedFaces.Length} faces found but it's not the one we are looking for in '{fn}'");
-                            }
-                        }
-                        catch
-                        {
-                            
-                            LogInfo($"Unable to process the image'{fn}'");
-                        }
-                    } // file was an image
-                    UpdateProgress(fileNum);
-                } // for each file found in user's directory
+                                    List<IdentifiedPerson> foundGroupInfo = await GenLib.GetCandidateNames(detectedFaces, personGroups, faceClient, false);
+                                    List<string> foundNames = foundGroupInfo.Select(g => g.PersonName).ToList<string>();
 
-                LogInfo($"Done.  Categorized {numCategorized}/{files.Length} files from directory '{rootFolder}' OK");
+                                    if (nameToFind == "" || foundNames.Contains(nameToFind, StringComparer.OrdinalIgnoreCase))
+                                    {
+                                        // we found an image with our desired face in it - copy it out to our target dir
+                                        CopyImageToCategoryDir(fn, nameToFind, foundNames);
+                                        numCategorized++;
+                                    }
+                                    else
+                                        LogInfo($"{detectedFaces.Length} faces found but it's not the one we are looking for in '{fn}'");
+                                }
+                            }
+                            catch
+                            {
+                                LogInfo($"Unable to process the image'{fn}'");
+                            }
+                        } // file was an image
+                        UpdateProgress(fileNum);
+                    } // for each file found in user's directory
+
+                    LogInfo($"Done.  Categorized {numCategorized}/{files.Length} files from directory '{rootFolder}' OK");
+                } // if internet
+                else
+                {
+                    if (containerMode)
+                    {
+
+                    }
+                    else
+                    {
+                        MessageBox.Show(GenLib.SetMessage(msgType4, string.Empty, string.Empty, null));
+                    }
+                }
             } // user directory was defined
         } // categorizeFiles
 

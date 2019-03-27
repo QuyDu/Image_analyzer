@@ -127,7 +127,7 @@ namespace GetImageMetaData
             this.cmbCameraMode.TabIndex = 31;
             this.cmbCameraMode.Text = "Manual";
             this.cmbCameraMode.Visible = false;
-            this.cmbCameraMode.SelectedIndexChanged += new System.EventHandler(this.cmbCameraMode_SelectedIndexChanged);
+            this.cmbCameraMode.SelectedIndexChanged += new System.EventHandler(this.CmbCameraMode_SelectedIndexChanged);
             // 
             // cmbSource
             // 
@@ -343,14 +343,14 @@ namespace GetImageMetaData
             this.trainFromWebToolStripMenuItem.Name = "trainFromWebToolStripMenuItem";
             this.trainFromWebToolStripMenuItem.Size = new System.Drawing.Size(287, 38);
             this.trainFromWebToolStripMenuItem.Text = "Train from Web";
-            this.trainFromWebToolStripMenuItem.Click += new System.EventHandler(this.trainFromWebToolStripMenuItem_Click);
+            this.trainFromWebToolStripMenuItem.Click += new System.EventHandler(this.TrainFromWebToolStripMenuItem_Click);
             // 
             // trainFromO365StripMenuItem
             // 
             this.trainFromO365StripMenuItem.Name = "trainFromO365StripMenuItem";
             this.trainFromO365StripMenuItem.Size = new System.Drawing.Size(287, 38);
             this.trainFromO365StripMenuItem.Text = "Train from O365";
-            this.trainFromO365StripMenuItem.Click += new System.EventHandler(this.trainFromO365StripMenuItem_Click);
+            this.trainFromO365StripMenuItem.Click += new System.EventHandler(this.TrainFromO365StripMenuItem_Click);
             // 
             // statusLabel
             // 
@@ -444,7 +444,7 @@ namespace GetImageMetaData
             this.categorizeFilesToolStripMenuItem.Name = "categorizeFilesToolStripMenuItem";
             this.categorizeFilesToolStripMenuItem.Size = new System.Drawing.Size(287, 38);
             this.categorizeFilesToolStripMenuItem.Text = "Categorize Files";
-            this.categorizeFilesToolStripMenuItem.Click += new System.EventHandler(this.categorizeFilesToolStripMenuItem_Click);
+            this.categorizeFilesToolStripMenuItem.Click += new System.EventHandler(this.CategorizeFilesToolStripMenuItem_Click);
             // 
             // menuItemDeleteFace
             // 
